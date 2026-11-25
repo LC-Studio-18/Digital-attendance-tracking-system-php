@@ -1,0 +1,1 @@
+<!-- Place Database credentials inside this file -->
