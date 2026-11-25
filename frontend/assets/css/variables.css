@@ -1,0 +1,18 @@
+/*
+ * variables.css
+ * Colours and sizes used across the whole site.
+ * Values are estimated from the Figma design; check against Figma Dev mode.
+ */
+:root {
+  --color-lime: #b6f23a;      /* IN status card, buttons */
+  --color-navy: #0b1d26;      /* sidebar, header, dark buttons */
+  --color-teal: #386a73;      /* footer, chart, accents */
+  --color-bg: #f4f7f9;        /* page background */
+  --color-card: #ffffff;      /* card background */
+  --color-text: #0f1f26;
+  --color-muted: #6b7a82;     /* small grey text */
+  --color-out-bg: #e6e8ea;    /* OUT / Clocked Out card */
+
+  --radius-card: 16px;
+  --radius-pill: 999px;
+}

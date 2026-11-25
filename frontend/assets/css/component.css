@@ -1,16 +1,81 @@
-.status-badge {
-  display: inline-block;
-  padding: 8px 24px;
-  border-radius: 999px;
-  font-size: 1.25rem;
+/*
+ * component.css
+ * Styles for the dashboard cards.
+ */
+
+/* ---------- Status card (IN / OUT) ---------- */
+
+/* The card is a row: icon | status | time */
+.status-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 24px;
+  border-radius: var(--radius-card);
+}
+
+/* IN = lime green, OUT = grey */
+.status-card--in {
+  background: var(--color-lime);
+  color: var(--color-navy);
+}
+
+.status-card--out {
+  background: var(--color-out-bg);
+  color: var(--color-text);
+}
+
+/* Round icon with the tick */
+.status-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 1.75rem;
   font-weight: bold;
-  color: #fff;
 }
 
-.status-badge--in {
-  background: #2e7d32;
+/* The status part and the time part stack their text */
+.status-card__main,
+.status-card__time {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.status-badge--out {
-  background: #757575;
+/* A thin line between the status part and the time part */
+.status-card__time {
+  padding-left: 20px;
+  border-left: 1px solid rgba(11, 29, 38, 0.3);
+}
+
+.status-card__label {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.status-card__value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+/* The time is smaller than the IN / OUT text */
+.status-card__value--time {
+  font-size: 1.75rem;
+}
+
+.status-card__pill {
+  align-self: flex-start;
+  padding: 2px 12px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}
+
+.status-card__date {
+  font-size: 0.8rem;
 }
