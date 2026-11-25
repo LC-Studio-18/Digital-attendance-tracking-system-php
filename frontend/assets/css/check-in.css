@@ -1,8 +1,9 @@
 /* QR check-in screen styles.
  *
  * What this file is: the visual layer for check-in.php only. Every selector is
- * scoped under .checkin-page so it cannot change the login page or other shared
- * components, even when teammates add rules to base.css/component.css later.
+ * scoped under .qr-checkin-page, and every class/ID uses the unique
+ * `qr-checkin-` prefix (for example qr-checkin-button--primary), so it cannot
+ * override or be overridden by styles from other contributors.
  *
  * Sections below: design tokens, page/container, header, scanner card, camera
  * viewport, buttons, manual entry form, footer, and responsive/a11y rules.
@@ -10,124 +11,124 @@
 
 /* Design tokens: colours and the page's base typography live in one place so
    the rest of the file only references variables. */
-.checkin-page {
-    --checkin-bg: #f1f5f9;
-    --checkin-surface: #ffffff;
-    --checkin-ink: #0f172a;
-    --checkin-muted: #475569;
-    --checkin-border: #cbd5e1;
-    --checkin-accent: #1d4ed8;
-    --checkin-accent-dark: #1e40af;
-    --checkin-success: #15803d;
-    --checkin-error: #b91c1c;
-    --checkin-viewport: #0f172a;
+.qr-checkin-page {
+    --qr-checkin-bg: #f1f5f9;
+    --qr-checkin-surface: #ffffff;
+    --qr-checkin-ink: #0f172a;
+    --qr-checkin-muted: #475569;
+    --qr-checkin-border: #cbd5e1;
+    --qr-checkin-accent: #1d4ed8;
+    --qr-checkin-accent-dark: #1e40af;
+    --qr-checkin-success: #15803d;
+    --qr-checkin-error: #b91c1c;
+    --qr-checkin-viewport: #0f172a;
 
     box-sizing: border-box;
     min-height: 100vh;
     margin: 0;
     padding: clamp(1rem, 4vw, 3rem) 1rem;
-    background: var(--checkin-bg);
-    color: var(--checkin-ink);
+    background: var(--qr-checkin-bg);
+    color: var(--qr-checkin-ink);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     line-height: 1.5;
 }
 
 /* Border-box sizing for every descendant makes widths/padding predictable. */
-.checkin-page *,
-.checkin-page *::before,
-.checkin-page *::after {
+.qr-checkin-page *,
+.qr-checkin-page *::before,
+.qr-checkin-page *::after {
     box-sizing: inherit;
 }
 
 /* JavaScript toggles the `hidden` attribute on panels and buttons; this rule
    guarantees they really disappear even if another stylesheet sets display. */
-.checkin-page [hidden] {
+.qr-checkin-page [hidden] {
     display: none !important;
 }
 
 /* Layout: a centred, single-column shell keeps the screen usable on phones. */
-.checkin-shell {
+.qr-checkin-shell {
     width: min(100%, 34rem);
     margin: 0 auto;
 }
 
 /* Screen introduction. */
-.checkin-header {
+.qr-checkin-header {
     margin-bottom: 1.5rem;
     text-align: center;
 }
 
-.checkin-header__eyebrow {
+.qr-checkin-header__eyebrow {
     display: inline-block;
     margin-bottom: 0.5rem;
-    color: var(--checkin-accent);
+    color: var(--qr-checkin-accent);
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
 }
 
-.checkin-header__title {
+.qr-checkin-header__title {
     margin: 0;
     font-size: clamp(1.5rem, 5vw, 2rem);
     line-height: 1.2;
 }
 
-.checkin-header__subtitle {
+.qr-checkin-header__subtitle {
     margin: 0.5rem 0 0;
-    color: var(--checkin-muted);
+    color: var(--qr-checkin-muted);
 }
 
 /* Scanner card: the raised white surface that holds all check-in controls. */
-.checkin-card {
+.qr-checkin-card {
     padding: clamp(1rem, 4vw, 1.75rem);
-    border: 1px solid var(--checkin-border);
+    border: 1px solid var(--qr-checkin-border);
     border-radius: 1rem;
-    background: var(--checkin-surface);
+    background: var(--qr-checkin-surface);
     box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
 }
 
-.checkin-card__title {
+.qr-checkin-card__title {
     margin: 0 0 1rem;
     font-size: 1.125rem;
 }
 
 /* Status banner: check-in.js sets data-state (pending, scanning, success,
    error) and the coloured left border communicates the state at a glance. */
-.checkin-status {
+.qr-checkin-status {
     margin: 0 0 1rem;
     padding: 0.75rem 1rem;
-    border: 1px solid var(--checkin-border);
-    border-left: 4px solid var(--checkin-accent);
+    border: 1px solid var(--qr-checkin-border);
+    border-left: 4px solid var(--qr-checkin-accent);
     border-radius: 0.5rem;
     background: #f8fafc;
-    color: var(--checkin-ink);
+    color: var(--qr-checkin-ink);
     font-size: 0.9375rem;
 }
 
-.checkin-status[data-state="scanning"],
-.checkin-status[data-state="success"] {
-    border-left-color: var(--checkin-success);
+.qr-checkin-status[data-state="scanning"],
+.qr-checkin-status[data-state="success"] {
+    border-left-color: var(--qr-checkin-success);
 }
 
-.checkin-status[data-state="error"] {
-    border-left-color: var(--checkin-error);
-    color: var(--checkin-error);
+.qr-checkin-status[data-state="error"] {
+    border-left-color: var(--qr-checkin-error);
+    color: var(--qr-checkin-error);
 }
 
 /* Camera viewport: a fixed aspect ratio reserves space before the stream
    starts, so the page does not jump when the video appears. */
-.scanner-frame {
+.qr-checkin-scanner-frame {
     position: relative;
     overflow: hidden;
     width: 100%;
     aspect-ratio: 4 / 3;
     border-radius: 0.75rem;
-    background: var(--checkin-viewport);
+    background: var(--qr-checkin-viewport);
 }
 
 /* object-fit: cover fills the frame without stretching the camera image. */
-.scanner-frame__video {
+.qr-checkin-scanner-frame__video {
     display: block;
     width: 100%;
     height: 100%;
@@ -136,14 +137,14 @@
 
 /* Decorative aiming guide drawn above the video; pointer-events: none keeps
    all clicks available to the controls below it. */
-.scanner-frame__overlay {
+.qr-checkin-scanner-frame__overlay {
     position: absolute;
     inset: 0;
     pointer-events: none;
 }
 
 /* Each corner shows only two borders, forming an L-shaped bracket. */
-.scanner-frame__corner {
+.qr-checkin-scanner-frame__corner {
     position: absolute;
     width: 2.5rem;
     height: 2.5rem;
@@ -151,7 +152,7 @@
     opacity: 0.9;
 }
 
-.scanner-frame__corner--top-left {
+.qr-checkin-scanner-frame__corner--top-left {
     top: 1rem;
     left: 1rem;
     border-right: 0;
@@ -159,7 +160,7 @@
     border-top-left-radius: 0.5rem;
 }
 
-.scanner-frame__corner--top-right {
+.qr-checkin-scanner-frame__corner--top-right {
     top: 1rem;
     right: 1rem;
     border-left: 0;
@@ -167,7 +168,7 @@
     border-top-right-radius: 0.5rem;
 }
 
-.scanner-frame__corner--bottom-left {
+.qr-checkin-scanner-frame__corner--bottom-left {
     bottom: 1rem;
     left: 1rem;
     border-right: 0;
@@ -175,7 +176,7 @@
     border-bottom-left-radius: 0.5rem;
 }
 
-.scanner-frame__corner--bottom-right {
+.qr-checkin-scanner-frame__corner--bottom-right {
     bottom: 1rem;
     right: 1rem;
     border-left: 0;
@@ -184,7 +185,7 @@
 }
 
 /* Placeholder text sits over the dark viewport until the camera is running. */
-.scanner-frame__placeholder {
+.qr-checkin-scanner-frame__placeholder {
     position: absolute;
     inset: 0;
     display: grid;
@@ -197,7 +198,7 @@
 }
 
 /* Controls wrap on narrow screens; check-in.js hides the ones not in use. */
-.checkin-actions {
+.qr-checkin-actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -205,8 +206,9 @@
     margin-top: 1rem;
 }
 
-/* Shared button base plus three variants: filled, outlined, and text link. */
-.button {
+/* Shared button base plus three variants: filled, outlined, and text link.
+   The `qr-checkin-button` prefix keeps these out of global button styles. */
+.qr-checkin-button {
     min-height: 2.75rem;
     padding: 0.625rem 1.25rem;
     border: 1px solid transparent;
@@ -217,128 +219,128 @@
 }
 
 /* Visible keyboard focus is required for accessible controls. */
-.button:focus-visible {
-    outline: 3px solid var(--checkin-accent);
+.qr-checkin-button:focus-visible {
+    outline: 3px solid var(--qr-checkin-accent);
     outline-offset: 2px;
 }
 
-.button:disabled {
+.qr-checkin-button:disabled {
     cursor: not-allowed;
     opacity: 0.65;
 }
 
-.button--primary {
-    background: var(--checkin-accent);
+.qr-checkin-button--primary {
+    background: var(--qr-checkin-accent);
     color: #ffffff;
 }
 
-.button--primary:hover:not(:disabled) {
-    background: var(--checkin-accent-dark);
+.qr-checkin-button--primary:hover:not(:disabled) {
+    background: var(--qr-checkin-accent-dark);
 }
 
-.button--secondary {
-    border-color: var(--checkin-border);
-    background: var(--checkin-surface);
-    color: var(--checkin-ink);
+.qr-checkin-button--secondary {
+    border-color: var(--qr-checkin-border);
+    background: var(--qr-checkin-surface);
+    color: var(--qr-checkin-ink);
 }
 
-.button--secondary:hover:not(:disabled) {
-    background: var(--checkin-bg);
+.qr-checkin-button--secondary:hover:not(:disabled) {
+    background: var(--qr-checkin-bg);
 }
 
-.button--link {
+.qr-checkin-button--link {
     padding-inline: 0.25rem;
     background: transparent;
-    color: var(--checkin-accent);
+    color: var(--qr-checkin-accent);
     text-decoration: underline;
 }
 
 /* Manual entry fallback: separated from the scanner by a rule. JavaScript
    toggles the `hidden` attribute on the whole section. */
-.manual-entry {
+.qr-checkin-manual-entry {
     margin-top: 1.25rem;
     padding-top: 1.25rem;
-    border-top: 1px solid var(--checkin-border);
+    border-top: 1px solid var(--qr-checkin-border);
 }
 
-.manual-entry__title {
+.qr-checkin-manual-entry__title {
     margin: 0;
     font-size: 1rem;
 }
 
 /* Holds the reason the fallback appeared (e.g. camera permission denied). */
-.manual-entry__hint {
+.qr-checkin-manual-entry__hint {
     margin: 0.5rem 0 1rem;
-    color: var(--checkin-muted);
+    color: var(--qr-checkin-muted);
     font-size: 0.9375rem;
 }
 
 /* Form: a labelled text input and confirm button. */
-.checkin-form__label {
+.qr-checkin-form__label {
     display: block;
     margin-bottom: 0.375rem;
     font-size: 0.9375rem;
     font-weight: 600;
 }
 
-.checkin-form__input {
+.qr-checkin-form__input {
     display: block;
     width: 100%;
     min-height: 2.75rem;
     margin-bottom: 0.875rem;
     padding: 0.625rem 0.75rem;
-    border: 1px solid var(--checkin-border);
+    border: 1px solid var(--qr-checkin-border);
     border-radius: 0.5rem;
-    background: var(--checkin-surface);
-    color: var(--checkin-ink);
+    background: var(--qr-checkin-surface);
+    color: var(--qr-checkin-ink);
     font: inherit;
 }
 
-.checkin-form__input:focus-visible {
-    outline: 3px solid var(--checkin-accent);
+.qr-checkin-form__input:focus-visible {
+    outline: 3px solid var(--qr-checkin-accent);
     outline-offset: 1px;
 }
 
 /* Submission feedback colour follows the data-state set by check-in.js. */
-.checkin-result {
+.qr-checkin-result {
     margin: 1rem 0 0;
     padding: 0.75rem 1rem;
     border-radius: 0.5rem;
     background: #f8fafc;
-    color: var(--checkin-ink);
+    color: var(--qr-checkin-ink);
     font-size: 0.9375rem;
 }
 
-.checkin-result[data-state="error"] {
+.qr-checkin-result[data-state="error"] {
     background: #fef2f2;
-    color: var(--checkin-error);
+    color: var(--qr-checkin-error);
 }
 
-.checkin-result[data-state="success"] {
+.qr-checkin-result[data-state="success"] {
     background: #f0fdf4;
-    color: var(--checkin-success);
+    color: var(--qr-checkin-success);
 }
 
 /* Footer reassurance that manual entry is always available. */
-.checkin-footer {
+.qr-checkin-footer {
     margin-top: 1rem;
-    color: var(--checkin-muted);
+    color: var(--qr-checkin-muted);
     font-size: 0.875rem;
     text-align: center;
 }
 
-.checkin-footer p {
+.qr-checkin-footer p {
     margin: 0;
 }
 
 /* Narrow screens: stack controls and keep the manual link left-aligned. */
 @media (max-width: 30rem) {
-    .checkin-actions {
+    .qr-checkin-actions {
         align-items: stretch;
         flex-direction: column;
     }
 
-    .button--link {
+    .qr-checkin-button--link {
         align-self: flex-start;
     }
 }
@@ -346,9 +348,9 @@
 /* Accessibility: respect users who ask their OS to reduce motion. There is no
    essential animation on this screen, so this is a safety net for future ones. */
 @media (prefers-reduced-motion: reduce) {
-    .checkin-page *,
-    .checkin-page *::before,
-    .checkin-page *::after {
+    .qr-checkin-page *,
+    .qr-checkin-page *::before,
+    .qr-checkin-page *::after {
         animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
     }
