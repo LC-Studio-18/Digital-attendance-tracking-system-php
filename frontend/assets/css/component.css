@@ -226,3 +226,42 @@
   font-size: 0.75rem;
   font-weight: bold;
 }
+
+/* ---------- Phone sizes: tighter status card ---------- */
+@media (max-width: 480px) {
+  .status-card {
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .status-card__icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.4rem;
+  }
+
+  .status-card__time {
+    padding-left: 12px;
+  }
+
+  .status-card__value {
+    font-size: 2rem;
+  }
+
+  .status-card__value--time {
+    font-size: 1.35rem;
+  }
+
+  /* Keep these on one line instead of wrapping */
+  .status-card__label,
+  .status-card__value--time,
+  .status-card__pill {
+    white-space: nowrap;
+  }
+
+  .clocked-out-card,
+  .hours-card,
+  .records-card {
+    padding: 16px;
+  }
+}
