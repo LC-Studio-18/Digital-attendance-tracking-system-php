@@ -51,7 +51,24 @@ function renderHoursSummary(hours) {
   `;
 }
 
+// Clocked Out card: shows when the person clocked out, or --:-- if still in.
+// Inputs: clockedOutAt (text such as "04:30 PM", or null if the shift is open),
+//         lastUpdated (text such as "24 Mar 2025, 09:15 AM")
+// Writes into: <section id="clocked-out">
+function renderClockedOut(clockedOutAt, lastUpdated) {
+  const el = document.getElementById("clocked-out");
+
+  el.className = "clocked-out-card";
+  el.innerHTML = `
+    <span class="clocked-out-card__label">Clocked Out</span>
+    <span class="clocked-out-card__time">${clockedOutAt || "--:--"}</span>
+    <span class="clocked-out-card__note">${clockedOutAt ? "Shift ended" : "Not yet clocked out"}</span>
+    <span class="clocked-out-card__updated">Last updated ${lastUpdated}</span>
+  `;
+}
+
 // Dummy data for now. Imaan will replace these two lines with a call
 // that passes in the real values from GET /api/dashboard.
 renderStatusBadge("IN", "09:15 AM", "Today, 24 Mar 2025");
 renderHoursSummary({ today: 4.5, week: 22.25 });
+renderClockedOut(null, "24 Mar 2025, 09:15 AM");
