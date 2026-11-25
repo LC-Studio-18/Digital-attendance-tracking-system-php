@@ -67,8 +67,76 @@ function renderClockedOut(clockedOutAt, lastUpdated) {
   `;
 }
 
+// Helper: turns "2026-11-25 08:00:00" into "25 Nov 2026"
+function formatRecordDate(dateTime) {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const datePart = dateTime.split(" ")[0];
+  const [year, month, day] = datePart.split("-").map(Number);
+  return `${day} ${months[month - 1]} ${year}`;
+}
+
+// Helper: turns "2026-11-25 08:00:00" into "08:00 AM" (or "--:--" if empty)
+function formatRecordTime(dateTime) {
+  if (!dateTime) return "--:--";
+  const [hourText, minutes] = dateTime.split(" ")[1].split(":");
+  const hour = Number(hourText);
+  const suffix = hour >= 12 ? "PM" : "AM";
+  const hour12 = hour % 12 || 12;
+  return `${String(hour12).padStart(2, "0")}:${minutes} ${suffix}`;
+}
+
+// Recent records: a list of the last 10 attendance records.
+// Input: records, an array like
+//   [{ record_id: 4, clock_in: "2026-11-25 08:00:00", clock_out: null,
+//      hours: null, is_corrected: false }]
+// Writes into: <section id="recent-records">
+function renderRecentRecords(records) {
+  const el = document.getElementById("recent-records");
+  el.className = "records-card";
+
+  // No records yet
+  if (!records || records.length === 0) {
+    el.innerHTML = `
+      <h2 class="records-card__title">Attendance History</h2>
+      <p class="records-card__empty">No records yet.</p>
+    `;
+    return;
+  }
+
+  const rows = records.map(function (record) {
+    // An open shift has no clock-out and no hours yet
+    const clockOut = record.clock_out ? formatRecordTime(record.clock_out) : "Still in";
+    const hours = record.hours !== null ? record.hours.toFixed(2) + " h" : "--";
+    const tag = record.is_corrected
+      ? '<span class="record__tag">Corrected</span>'
+      : "";
+
+    return `
+      <li class="record ${record.is_corrected ? "record--corrected" : ""}">
+        <div class="record__date">${formatRecordDate(record.clock_in)} ${tag}</div>
+        <div class="record__times">
+          <span>In: ${formatRecordTime(record.clock_in)}</span>
+          <span>Out: ${clockOut}</span>
+          <span>${hours}</span>
+        </div>
+      </li>
+    `;
+  });
+
+  el.innerHTML = `
+    <h2 class="records-card__title">Attendance History</h2>
+    <ul class="records-list">${rows.join("")}</ul>
+  `;
+}
+
 // Dummy data for now. Imaan will replace these two lines with a call
 // that passes in the real values from GET /api/dashboard.
 renderStatusBadge("IN", "09:15 AM", "Today, 24 Mar 2025");
 renderHoursSummary({ today: 4.5, week: 22.25 });
 renderClockedOut(null, "24 Mar 2025, 09:15 AM");
+
+renderRecentRecords([
+  { record_id: 4, clock_in: "2026-11-24 09:15:00", clock_out: null, hours: null, is_corrected: false },
+  { record_id: 3, clock_in: "2026-11-23 08:30:00", clock_out: "2026-11-23 16:30:00", hours: 8, is_corrected: true },
+  { record_id: 2, clock_in: "2026-11-22 08:25:00", clock_out: "2026-11-22 16:30:00", hours: 8.08, is_corrected: false }
+]);
