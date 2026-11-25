@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0f172a">
+    <title>QR check-in | mobile camera check</title>
+    <!-- Manual QA page for Task 3. It loads the real QrScanner component and
+         shows environment info, a live preview, scan results and a state log.
+         Every class and ID uses the unique `qr-checkin-test-` prefix so this
+         page cannot interfere with the check-in screen or teammates' styles. -->
+    <style>
+        .qr-checkin-test-page {
+            box-sizing: border-box;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+            background: #f1f5f9;
+            color: #0f172a;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.5;
+        }
+
+        .qr-checkin-test-page *,
+        .qr-checkin-test-page *::before,
+        .qr-checkin-test-page *::after {
+            box-sizing: inherit;
+        }
+
+        .qr-checkin-test-page [hidden] {
+            display: none !important;
+        }
+
+        .qr-checkin-test-shell {
+            width: min(100%, 34rem);
+            margin: 0 auto;
+        }
+
+        .qr-checkin-test-panel {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.75rem;
+            background: #ffffff;
+        }
+
+        .qr-checkin-test-panel h2 {
+            margin: 0 0 0.75rem;
+            font-size: 1.05rem;
+        }
+
+        .qr-checkin-test-facts {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 0.35rem 0.75rem;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .qr-checkin-test-facts dt {
+            color: #475569;
+        }
+
+        .qr-checkin-test-facts dd {
+            margin: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .qr-checkin-test-warning {
+            margin: 0.75rem 0 0;
+            padding: 0.6rem 0.75rem;
+            border-radius: 0.5rem;
+            background: #fef2f2;
+            color: #b91c1c;
+            font-size: 0.9rem;
+        }
+
+        .qr-checkin-test-frame {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            border-radius: 0.5rem;
+            background: #0f172a;
+        }
+
+        .qr-checkin-test-video {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .qr-checkin-test-placeholder {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            margin: 0;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+
+        .qr-checkin-test-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 0.75rem 0;
+        }
+
+        .qr-checkin-test-button {
+            min-height: 2.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid #1d4ed8;
+            border-radius: 0.5rem;
+            background: #1d4ed8;
+            color: #ffffff;
+            font: inherit;
+            font-weight: 600;
+        }
+
+        .qr-checkin-test-button:focus-visible {
+            outline: 3px solid #1e40af;
+            outline-offset: 2px;
+        }
+
+        .qr-checkin-test-status {
+            margin: 0 0 0.75rem;
+            padding: 0.6rem 0.75rem;
+            border-left: 4px solid #1d4ed8;
+            border-radius: 0.5rem;
+            background: #f8fafc;
+            font-size: 0.9rem;
+        }
+
+        .qr-checkin-test-status[data-state="scanning"] {
+            border-left-color: #15803d;
+        }
+
+        .qr-checkin-test-status[data-state="error"] {
+            border-left-color: #b91c1c;
+        }
+
+        .qr-checkin-test-code {
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .qr-checkin-test-log {
+            max-height: 12rem;
+            overflow-y: auto;
+            padding-left: 1.25rem;
+            font-size: 0.85rem;
+        }
+
+        .qr-checkin-test-checklist {
+            padding-left: 1.25rem;
+            font-size: 0.9rem;
+        }
+
+        .qr-checkin-test-link {
+            display: inline-block;
+            margin-top: 0.75rem;
+            color: #1d4ed8;
+        }
+    </style>
+</head>
+<body class="qr-checkin-test-page">
+    <main class="qr-checkin-test-shell">
+        <header class="qr-checkin-test-panel">
+            <h1>QR scanner mobile check</h1>
+            <p>Manual QA page for the camera scanner. It uses the same component as the real check-in screen.</p>
+        </header>
+
+        <!-- Environment facts explain why a camera might fail on a phone. -->
+        <section class="qr-checkin-test-panel" aria-labelledby="qr-checkin-test-env-heading">
+            <h2 id="qr-checkin-test-env-heading">Environment</h2>
+            <dl class="qr-checkin-test-facts">
+                <dt>Secure context</dt>
+                <dd id="qr-checkin-test-secure">checking…</dd>
+                <dt>BarcodeDetector</dt>
+                <dd id="qr-checkin-test-detector">checking…</dd>
+                <dt>Formats</dt>
+                <dd id="qr-checkin-test-formats">checking…</dd>
+                <dt>Camera permission</dt>
+                <dd id="qr-checkin-test-permission">checking…</dd>
+                <dt>Browser</dt>
+                <dd id="qr-checkin-test-browser">checking…</dd>
+            </dl>
+            <p class="qr-checkin-test-warning" id="qr-checkin-test-warning" hidden>
+                Camera scanning needs both HTTPS (or localhost) and a browser with BarcodeDetector support.
+                Manual code entry on the real check-in screen still works.
+            </p>
+        </section>
+
+        <!-- Live camera check: preview, controls, decoded value and event log. -->
+        <section class="qr-checkin-test-panel" aria-labelledby="qr-checkin-test-camera-heading">
+            <h2 id="qr-checkin-test-camera-heading">Camera check</h2>
+            <p class="qr-checkin-test-status" id="qr-checkin-test-status" data-state="idle" role="status" aria-live="polite">Ready.</p>
+            <div class="qr-checkin-test-frame">
+                <video class="qr-checkin-test-video" id="qr-checkin-test-video" playsinline muted autoplay aria-label="Camera preview for QR scanner testing"></video>
+                <p class="qr-checkin-test-placeholder" id="qr-checkin-test-placeholder">Camera preview appears here</p>
+            </div>
+            <div class="qr-checkin-test-actions">
+                <button class="qr-checkin-test-button" type="button" id="qr-checkin-test-start">Start camera</button>
+                <button class="qr-checkin-test-button" type="button" id="qr-checkin-test-stop" hidden>Stop camera</button>
+            </div>
+            <p>Last decoded code: <output class="qr-checkin-test-code" id="qr-checkin-test-code">none</output></p>
+            <ol class="qr-checkin-test-log" id="qr-checkin-test-log" aria-live="polite"></ol>
+        </section>
+
+        <!-- Steps to run on a physical phone; see tests/README.md for details. -->
+        <section class="qr-checkin-test-panel" aria-labelledby="qr-checkin-test-steps-heading">
+            <h2 id="qr-checkin-test-steps-heading">Mobile checklist</h2>
+            <ol class="qr-checkin-test-checklist">
+                <li>Open this page on your phone over HTTPS (or via localhost on the device).</li>
+                <li>Confirm the environment facts: secure context yes, BarcodeDetector available.</li>
+                <li>Tap Start camera and accept the permission prompt; the rear camera should be used.</li>
+                <li>Point the phone at any QR code; the decoded value should appear under "Last decoded code".</li>
+                <li>Tap Stop camera and confirm the camera indicator turns off.</li>
+                <li>Revoke camera permission in browser settings, reload, then start again: the log should show <code>permission-denied</code>.</li>
+                <li>Open the real check-in screen and confirm manual entry appears when the camera is blocked.</li>
+            </ol>
+            <a class="qr-checkin-test-link" href="../check-in.php">Open the real check-in screen</a>
+        </section>
+    </main>
+
+    <!-- Component first, then this page's controller. -->
+    <script src="../assets/js/qr-scanner.js"></script>
+    <script src="camera-check.js"></script>
+</body>
+</html>
