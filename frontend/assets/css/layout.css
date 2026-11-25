@@ -64,3 +64,31 @@
   align-items: center;
   margin-bottom: 24px;
 }
+
+/* ---------- Dashboard rows ---------- */
+
+/* The dashboard sections stack with a gap between them */
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Row 1: status card (2 parts wide) beside the Clocked Out card (1 part) */
+.row--status {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+/* min-width: 0 stops a wide card from pushing the page sideways */
+.row--status > * {
+  min-width: 0;
+}
+
+/* On small screens the two cards stack again */
+@media (max-width: 768px) {
+  .row--status {
+    grid-template-columns: 1fr;
+  }
+}
