@@ -4,7 +4,7 @@
 !.env.example
 
 # Protected credentials
-config/credentials.php
+credentials.php
 
 # Dependencies
 vendor/
