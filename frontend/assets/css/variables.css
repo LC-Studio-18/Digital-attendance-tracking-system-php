@@ -1,0 +1,43 @@
+:root {
+    --color-navy: #0b1a2e;
+    --color-navy-soft: #132b45;
+    --color-lime: #b7f24a;
+    --color-lime-dark: #8fcf2f;
+    --color-teal: #0f6f6c;
+    --color-teal-dark: #0a5553;
+    --color-white: #ffffff;
+    --color-grey-light: #f4f6f8;
+    --color-grey-mid: #6b7280;
+    --color-grey-dark: #1f2933;
+    --color-border: #e3e8ee;
+
+    --color-present-bg: #fde8ef;
+    --color-present-text: #be185d;
+    --color-absent-bg: #e0f2fe;
+    --color-absent-text: #0369a1;
+    --color-away-bg: #fef3c7;
+    --color-away-text: #b45309;
+    --color-late-bg: #fee2e2;
+    --color-late-text: #b91c1c;
+
+    --font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    --font-size-sm: 0.8125rem;
+    --font-size-base: 0.9375rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.5rem;
+    --font-size-value: 2.25rem;
+
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-pill: 999px;
+
+    --space-xs: 6px;
+    --space-sm: 10px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+
+    --shadow-card: 0 10px 24px rgba(11, 26, 46, 0.08);
+    --shadow-soft: 0 4px 12px rgba(11, 26, 46, 0.06);
+}
