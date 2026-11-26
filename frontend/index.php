@@ -163,6 +163,7 @@ if ($isLoginApi) {
 
     session_regenerate_id(true);
     $_SESSION['staff_id'] = $staff['id'];
+    $_SESSION['staff_name'] = $staff['name'];
 
     echo json_encode(['success' => true, 'staff' => $staff]);
     exit;
@@ -218,26 +219,37 @@ header('Cache-Control: no-store');
     <link rel="stylesheet" href="assets/css/component.css">
 </head>
 <body>
-    <div class="app">
-        <aside class="sidebar">
-            <div class="sidebar__logo">LC Attends</div>
-            <nav class="sidebar__nav">
-                <a href="index.php" class="sidebar__link sidebar__link--active">Dashboard</a>
-                <a href="#" class="sidebar__link">Attendance log</a>
+    <div class="pf-app">
+        <aside class="pf-sidebar">
+            <div class="pf-sidebar__logo">LC Attends</div>
+
+            <nav class="pf-sidebar__nav">
+                <a href="index.php" class="pf-sidebar__link pf-sidebar__link--active">Dashboard</a>
+                <a href="#" class="pf-sidebar__link">Attendance log</a>
             </nav>
+
+            <div class="pf-sidebar__access">
+                <span class="pf-sidebar__access-pill">Employee Access</span>
+                <span class="pf-sidebar__access-role">Employee</span>
+                <span class="pf-sidebar__access-place">Life Choices Lansdowne</span>
+                <span class="pf-sidebar__live"><span class="pf-sidebar__live-dot"></span>Live</span>
+            </div>
+
+            <div class="pf-sidebar-user" id="sidebar-user"></div>
+
             <a href="<?php echo htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8'); ?>"
-               class="sidebar__logout"
+               class="pf-sidebar__logout"
                data-logout>Logout</a>
         </aside>
 
-        <div class="main">
-            <header class="topbar">
+        <div class="pf-main">
+            <header class="pf-topbar">
                 <span id="today-date"></span>
-                <span id="last-updated"></span>
+                <span id="last-updated" hidden></span>
                 <span id="user-chip"></span>
             </header>
 
-            <main class="dashboard" id="dashboard" aria-busy="true">
+            <main class="pf-dashboard" id="dashboard" aria-busy="true">
                 <section id="greeting"></section>
 
                 <!--
@@ -254,21 +266,31 @@ header('Cache-Control: no-store');
                 </div>
 
                 <div id="dashboard-content" hidden>
-                    <div class="row row--status">
+                    <div class="pf-row pf-row--status">
                         <section id="status-badge"></section>
                         <section id="clocked-out"></section>
                     </div>
 
                     <section id="hours-summary"></section>
 
-                    <div class="row row--history">
+                    <div class="pf-row pf-row--overview">
+                        <section id="attendance-chart"></section>
+                        <section id="week-summary"></section>
+                    </div>
+
+                    <div class="pf-row pf-row--history">
                         <section id="recent-records"></section>
+                        <section id="help-card"></section>
                     </div>
                 </div>
             </main>
+
+            <footer class="pf-site-footer" id="site-footer" hidden></footer>
         </div>
     </div>
 
+    <script>window.DASHBOARD_MANUAL_RENDER = true;</script>
+    <script src="assets/js/dashboard.js"></script>
     <script>
         (function () {
             'use strict';
@@ -279,6 +301,7 @@ header('Cache-Control: no-store');
             var LOGIN_URL = <?php echo json_encode($loginUrl); ?>;
             var DEBUG = <?php echo json_encode(APP_DEBUG); ?>;
             var STAFF_ID = <?php echo json_encode($_SESSION['staff_id'] ?? null); ?>;
+            var STAFF_NAME = <?php echo json_encode($_SESSION['staff_name'] ?? 'Staff Member'); ?>;
             var TIMEOUT_MS = 10000;
             var REFRESH_EVENTS = [
                 'attendance:clock-updated',
@@ -523,18 +546,45 @@ header('Cache-Control: no-store');
             }
 
             function render(data) {
-                todayEl.textContent = new Date().toLocaleDateString('en-US', {
-                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-                });
-                userEl.textContent = STAFF_ID ? 'Staff #' + STAFF_ID : 'Staff';
-                greetingEl.textContent = 'Dashboard';
-                lastUpdatedEl.textContent = data.lastUpdatedDisplay ||
-                    (data.generatedAt ? 'Last updated ' + formatDateTime(data.generatedAt) : '');
+                var clockInText = data.clockInDisplay ||
+                    (data.clockInAt ? formatTime(data.clockInAt) : '--:--');
+                var clockInDate = data.clockInDateDisplay ||
+                    (data.clockInAt ? formatDate(data.clockInAt) : '');
+                var clockOutText = data.clockOutDisplay ||
+                    (data.clockOutAt ? formatTime(data.clockOutAt) : null);
+                var updatedText = data.lastUpdatedDisplay ||
+                    (data.generatedAt ? formatDateTime(data.generatedAt) : 'just now');
+                var records = data.records || [];
 
-                renderStatus(data);
-                renderClockedOut(data);
-                renderHours(data);
-                renderRecords(data.records);
+                if (window.DashboardUI && typeof window.DashboardUI.render === 'function') {
+                    // Updated dashboard-ui renderer (pf-* classes, chart, help card).
+                    window.DashboardUI.render({
+                        fullName: STAFF_NAME,
+                        today: new Date(),
+                        status: data.status,
+                        clockInDisplay: clockInText,
+                        clockInDateDisplay: clockInDate,
+                        clockOutDisplay: clockOutText,
+                        lastUpdatedDisplay: updatedText,
+                        hours: data.hours,
+                        records: records,
+                        daysPresent: records.filter(function (record) {
+                            return Boolean(record.clock_in);
+                        }).length
+                    });
+                } else {
+                    // Fallback if dashboard.js did not load.
+                    renderStatus(data);
+                    renderClockedOut(data);
+                    renderHours(data);
+                    renderRecords(records);
+                }
+
+                lastUpdatedEl.textContent = updatedText;
+                var footer = document.getElementById('site-footer');
+                if (footer) {
+                    footer.hidden = false;
+                }
             }
 
             function setState(state, message) {
