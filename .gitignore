@@ -15,4 +15,4 @@ storage/logs/*
 
 # System files
 .DS_Store
-Thumbs.db
+Thumbs.dblocal-test/
