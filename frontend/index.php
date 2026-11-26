@@ -11,6 +11,10 @@ $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
 $clientAddress = $_SERVER['REMOTE_ADDR'] ?? '';
 $localPreview = in_array($clientAddress, ['127.0.0.1', '::1'], true) && isset($_GET['preview']);
 
+// Works for both the PHP dev server (/) and the XAMPP Apache alias (/attendance).
+$scriptDir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+$loginUrl = $scriptDir . '/login.php';
+
 /*
  * This file is the front controller for the frontend web root.
  * All browser API calls are routed here so nothing under backend/ has to be
@@ -21,9 +25,28 @@ $isLogoutApi = strpos($requestPath, '/api/logout') === 0
     || (($_GET['api'] ?? '') === 'logout');
 
 if ($isLogoutApi) {
-    header('Content-Type: application/json');
+    // Clear the session data and the browser's session cookie.
     $_SESSION = [];
+    if (ini_get('session.use_cookies')) {
+        $cookie = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $cookie['path'],
+            $cookie['domain'],
+            $cookie['secure'],
+            $cookie['httponly']
+        );
+    }
     session_destroy();
+
+    // A direct link (GET) lands on the login page; AJAX gets JSON.
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
+        redirectTo($loginUrl);
+    }
+
+    header('Content-Type: application/json');
     echo json_encode(['success' => true]);
     exit;
 }
@@ -202,7 +225,9 @@ header('Cache-Control: no-store');
                 <a href="index.php" class="sidebar__link sidebar__link--active">Dashboard</a>
                 <a href="#" class="sidebar__link">Attendance log</a>
             </nav>
-            <a href="#" class="sidebar__logout">Logout</a>
+            <a href="<?php echo htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8'); ?>"
+               class="sidebar__logout"
+               data-logout>Logout</a>
         </aside>
 
         <div class="main">
@@ -250,6 +275,8 @@ header('Cache-Control: no-store');
 
             var PREVIEW = <?php echo isset($_GET['preview']) ? 'true' : 'false'; ?>;
             var ENDPOINT = 'index.php?api=dashboard' + (PREVIEW ? '&preview=1' : '');
+            var LOGOUT_ENDPOINT = 'index.php?api=logout';
+            var LOGIN_URL = <?php echo json_encode($loginUrl); ?>;
             var DEBUG = <?php echo json_encode(APP_DEBUG); ?>;
             var STAFF_ID = <?php echo json_encode($_SESSION['staff_id'] ?? null); ?>;
             var TIMEOUT_MS = 10000;
@@ -640,6 +667,29 @@ header('Cache-Control: no-store');
                     event.target.closest('[data-clock-action]')) {
                     scheduleRefresh();
                 }
+            });
+
+            /* ---------- Logout ---------- */
+
+            document.querySelectorAll('[data-logout]').forEach(function (link) {
+                link.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    link.setAttribute('aria-disabled', 'true');
+
+                    fetch(LOGOUT_ENDPOINT, {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json' },
+                        credentials: 'same-origin',
+                        cache: 'no-store'
+                    })
+                        .catch(function () {
+                            // If the API call fails, the guard will bounce us
+                            // back to login if the session is still active.
+                        })
+                        .then(function () {
+                            window.location.assign(LOGIN_URL);
+                        });
+                });
             });
 
             window.Dashboard = {
