@@ -193,6 +193,91 @@ function renderWeekSummary(daysPresent, workingDays) {
   `;
 }
 
+// Attendance chart: a smooth area chart, one point per day.
+// Input: days, an array like [{ label: "Mar 18", value: 45 }, ...]
+//        where value is the attendance from 0 to 100.
+// Writes into: <section id="attendance-chart">
+function renderAttendanceChart(days) {
+  const el = document.getElementById("attendance-chart");
+  el.className = "chart-card";
+
+  const header = `
+    <div class="chart-card__header">
+      <h2 class="chart-card__title">Attendance Overview</h2>
+      <select class="chart-card__filter" aria-label="Time range">
+        <option>This Month</option>
+      </select>
+    </div>
+  `;
+
+  // No data: show the header and a short message
+  if (!days || days.length === 0) {
+    el.innerHTML = header + '<p class="records-card__empty">No data yet.</p>';
+    return;
+  }
+
+  // Size of the drawing and the space kept for the labels
+  const width = 600;
+  const height = 230;
+  const left = 40;
+  const right = 24;
+  const top = 12;
+  const bottom = 30;
+  const plotW = width - left - right;
+  const plotH = height - top - bottom;
+  const baseY = top + plotH;
+
+  // Turn each day into an x and y position on the drawing
+  const points = days.map(function (day, i) {
+    const value = Math.min(100, Math.max(0, Number(day.value)));
+    return {
+      x: left + (days.length > 1 ? (i * plotW) / (days.length - 1) : plotW / 2),
+      y: baseY - (value / 100) * plotH,
+      label: day.label
+    };
+  });
+
+  // The smooth line: a curve from each point to the next
+  let line = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1];
+    const cur = points[i];
+    const midX = (prev.x + cur.x) / 2;
+    line += ` C ${midX} ${prev.y}, ${midX} ${cur.y}, ${cur.x} ${cur.y}`;
+  }
+
+  // The filled area: the same line, closed along the bottom
+  const area = `${line} L ${points[points.length - 1].x} ${baseY} L ${points[0].x} ${baseY} Z`;
+
+  // Horizontal grid lines with the 0 to 100 numbers
+  const gridLines = [0, 25, 50, 75, 100].map(function (tick) {
+    const y = baseY - (tick / 100) * plotH;
+    return `
+      <line class="chart__grid" x1="${left}" x2="${width - right}" y1="${y}" y2="${y}"></line>
+      <text class="chart__axis" x="${left - 8}" y="${y + 4}" text-anchor="end">${tick}</text>
+    `;
+  });
+
+  // A dot on each point and the day label underneath
+  const dots = points.map(function (p) {
+    return `<circle class="chart__dot" cx="${p.x}" cy="${p.y}" r="4"></circle>`;
+  });
+  const labels = points.map(function (p) {
+    return `<text class="chart__axis" x="${p.x}" y="${height - 8}" text-anchor="middle">${p.label}</text>`;
+  });
+
+  el.innerHTML = `
+    ${header}
+    <svg class="chart__svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Attendance overview chart">
+      ${gridLines.join("")}
+      <path class="chart__area" d="${area}"></path>
+      <path class="chart__line" d="${line}"></path>
+      ${dots.join("")}
+      ${labels.join("")}
+    </svg>
+  `;
+}
+
 // Dummy data for now. Imaan will replace these two lines with a call
 // that passes in the real values from GET /api/dashboard.
 renderStatusBadge("IN", "09:15 AM", "Today, 24 Mar 2025");
@@ -208,3 +293,12 @@ renderRecentRecords([
 
 renderGreeting("Phelisa Fani", new Date());
 renderWeekSummary(5, 5);
+renderAttendanceChart([
+  { label: "Mar 18", value: 45 },
+  { label: "Mar 19", value: 58 },
+  { label: "Mar 20", value: 75 },
+  { label: "Mar 21", value: 75 },
+  { label: "Mar 22", value: 65 },
+  { label: "Mar 23", value: 87 },
+  { label: "Mar 24", value: 82 }
+]);

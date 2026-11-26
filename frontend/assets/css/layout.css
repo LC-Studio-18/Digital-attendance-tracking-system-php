@@ -77,7 +77,7 @@
 /* Row 1: status card (2 parts wide) beside the Clocked Out card (1 part) */
 .row--status {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1.28fr 1fr;
   gap: 24px;
 }
 
@@ -133,5 +133,30 @@
   /* Less padding around the content on small screens */
   .main {
     padding: 16px;
+  }
+}
+
+/* ---------- Rows 2 and 3: wide card beside a narrow card ---------- */
+
+/* Row 2: Attendance Overview chart beside the This Week card.
+   Row 3: Attendance History beside the Need Help card. */
+.row--overview,
+.row--history {
+  display: grid;
+  grid-template-columns: 2.7fr 1fr;
+  gap: 24px;
+}
+
+/* min-width: 0 stops a wide card from pushing the page sideways */
+.row--overview > *,
+.row--history > * {
+  min-width: 0;
+}
+
+/* On phones the cards stack again */
+@media (max-width: 768px) {
+  .row--overview,
+  .row--history {
+    grid-template-columns: 1fr;
   }
 }
