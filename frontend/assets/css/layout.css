@@ -1,87 +1,112 @@
 /* =========================================
-   Shared Application Header
+   GLOBAL PAGE RESET
 ========================================= */
 
-.site-header {
+html,
+body {
   width: 100%;
-  min-height: 99px;
-  background-color: #0e181f;
-  display: flex;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* =========================================
+   APPLICATION HEADER
+========================================= */
+
+/* Desktop branding is displayed in the sidebar */
+.site-header {
+  display: none;
+  position: relative;
+  z-index: 1100;
   align-items: center;
+  width: 100%;
+  min-height: 75px;
+  background-color: #0e181f;
 }
 
 .site-header__container {
+  display: flex;
+  align-items: center;
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 0 32px;
-  display: flex;
-  align-items: center;
+  padding: 0 20px;
 }
 
 .site-header__brand {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  min-width: 0;
   text-decoration: none;
 }
 
 .site-header__logo {
   display: block;
-  width: 101px;
-  height: 60px;
+  width: 85px;
+  height: 55px;
+  flex-shrink: 0;
   object-fit: contain;
 }
 
 .site-header__wordmark {
   display: block;
-  width: 180px;
+  width: 150px;
+  max-width: 100%;
   height: auto;
   object-fit: contain;
 }
 
-/* Mobile header */
-@media (max-width: 600px) {
+/* =========================================
+   MOBILE HEADER
+========================================= */
+
+@media (max-width: 768px) {
   .site-header {
+    display: flex;
     min-height: 75px;
   }
 
   .site-header__container {
-    padding: 0 20px;
+    padding-right: 75px;
+    padding-left: 16px;
   }
 
   .site-header__logo {
-    width: 101px;
-    height: 60px;
+    width: 80px;
+    height: 55px;
   }
 
   .site-header__wordmark {
-    width: 150px;
-    height: auto;
+    width: 145px;
   }
 }
 
-/* Very narrow mobile screens */
+/* =========================================
+   VERY SMALL SCREENS
+========================================= */
+
 @media (max-width: 360px) {
   .site-header__container {
-    padding: 0 12px;
+    padding-right: 65px;
+    padding-left: 10px;
   }
 
   .site-header__brand {
-    gap: 8px;
-    min-width: 0;
+    gap: 6px;
   }
 
   .site-header__logo {
-    width: 76px;
-    height: 45px;
-    flex-shrink: 0;
+    width: 65px;
+    height: 48px;
   }
 
   .site-header__wordmark {
-    width: 120px;
-    max-width: 100%;
-    height: auto;
-    flex-shrink: 1;
+    width: 115px;
   }
 }
