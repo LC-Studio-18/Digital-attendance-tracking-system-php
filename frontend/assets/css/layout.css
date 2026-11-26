@@ -4,7 +4,7 @@
  */
 
 /* The whole app is a row: sidebar | main */
-.app {
+.pf-app {
   display: flex;
   min-height: 100vh;
 }
@@ -12,7 +12,7 @@
 /* ---------- Sidebar ---------- */
 
 /* Dark sidebar */
-.sidebar {
+.pf-sidebar {
   width: 240px;
   flex-shrink: 0;
   background: var(--color-navy);
@@ -22,21 +22,21 @@
   flex-direction: column;
 }
 
-.sidebar__logo {
+.pf-sidebar__logo {
   font-size: 1.5rem;
   font-weight: 800;
   font-style: italic;
   margin-bottom: 32px;
 }
 
-.sidebar__nav {
+.pf-sidebar__nav {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 /* Each link is an icon and a label side by side */
-.sidebar__link {
+.pf-sidebar__link {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -47,7 +47,7 @@
 }
 
 /* The page you are on is highlighted in lime */
-.sidebar__link--active {
+.pf-sidebar__link--active {
   background: var(--color-lime);
   color: var(--color-navy);
   font-weight: bold;
@@ -55,7 +55,7 @@
 
 /* Employee Access card: margin-top: auto pushes it, the user card
    and Logout to the bottom of the sidebar */
-.sidebar__access {
+.pf-sidebar__access {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -65,7 +65,7 @@
   background: var(--color-teal);
 }
 
-.sidebar__access-pill {
+.pf-sidebar__access-pill {
   align-self: flex-start;
   padding: 4px 14px;
   border-radius: var(--radius-pill);
@@ -75,19 +75,19 @@
   font-weight: 700;
 }
 
-.sidebar__access-role {
+.pf-sidebar__access-role {
   margin-top: 4px;
   font-size: 1.1rem;
   font-weight: 700;
 }
 
-.sidebar__access-place {
+.pf-sidebar__access-place {
   font-size: 0.8rem;
   font-weight: 600;
 }
 
 /* The lime dot and the word Live */
-.sidebar__live {
+.pf-sidebar__live {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -95,7 +95,7 @@
   font-size: 0.85rem;
 }
 
-.sidebar__live-dot {
+.pf-sidebar__live-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -103,7 +103,7 @@
 }
 
 /* User card: avatar, name and role in a thin outlined box */
-.sidebar-user {
+.pf-sidebar-user {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -113,7 +113,7 @@
   border-radius: 12px;
 }
 
-.sidebar-user__avatar {
+.pf-sidebar-user__avatar {
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -125,24 +125,24 @@
   font-weight: 700;
 }
 
-.sidebar-user__text {
+.pf-sidebar-user__text {
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
-.sidebar-user__name {
+.pf-sidebar-user__name {
   font-size: 0.85rem;
   font-weight: 700;
 }
 
-.sidebar-user__role {
+.pf-sidebar-user__role {
   font-size: 0.7rem;
   opacity: 0.8;
 }
 
 /* Logout sits at the bottom with its icon */
-.sidebar__logout {
+.pf-sidebar__logout {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -156,13 +156,13 @@
 /* ---------- Main area ---------- */
 
 /* Main area takes the rest of the width */
-.main {
+.pf-main {
   flex: 1;
   min-width: 0;
   padding: 24px;
 }
 
-.topbar {
+.pf-topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -172,54 +172,54 @@
 /* ---------- Dashboard rows ---------- */
 
 /* The dashboard sections stack with a gap between them */
-.dashboard {
+.pf-dashboard {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
 /* Row 1: status card (a little wider) beside the Clocked Out card */
-.row--status {
+.pf-row--status {
   display: grid;
   grid-template-columns: 1.28fr 1fr;
   gap: 24px;
 }
 
 /* min-width: 0 stops a wide card from pushing the page sideways */
-.row--status > * {
+.pf-row--status > * {
   min-width: 0;
 }
 
 /* Row 2: Attendance Overview chart beside the This Week card.
    Row 3: Attendance History beside the Need Help card. */
-.row--overview,
-.row--history {
+.pf-row--overview,
+.pf-row--history {
   display: grid;
   grid-template-columns: 2.7fr 1fr;
   gap: 24px;
 }
 
-.row--overview > *,
-.row--history > * {
+.pf-row--overview > *,
+.pf-row--history > * {
   min-width: 0;
 }
 
 /* ---------- Phone layout (768px and below) ---------- */
 @media (max-width: 768px) {
   /* The cards in each row stack */
-  .row--status,
-  .row--overview,
-  .row--history {
+  .pf-row--status,
+  .pf-row--overview,
+  .pf-row--history {
     grid-template-columns: 1fr;
   }
 
   /* Stack the sidebar above the main area */
-  .app {
+  .pf-app {
     flex-direction: column;
   }
 
   /* The sidebar becomes a bar across the top with the logo, links and Logout */
-  .sidebar {
+  .pf-sidebar {
     width: 100%;
     flex-direction: row;
     flex-wrap: wrap;
@@ -229,55 +229,55 @@
     padding: 12px 16px;
   }
 
-  .sidebar__logo {
+  .pf-sidebar__logo {
     margin-bottom: 0;
     font-size: 1.25rem;
   }
 
-  .sidebar__nav {
+  .pf-sidebar__nav {
     flex-direction: row;
     gap: 8px;
   }
 
-  .sidebar__link {
+  .pf-sidebar__link {
     padding: 8px 12px;
   }
 
   /* The two cards only show on larger screens */
-  .sidebar__access,
-  .sidebar-user {
+  .pf-sidebar__access,
+  .pf-sidebar-user {
     display: none;
   }
 
-  .sidebar__logout {
+  .pf-sidebar__logout {
     margin-top: 0;
   }
 
   /* Less padding around the content on small screens */
-  .main {
+  .pf-main {
     padding: 16px;
   }
 }
 
 /* ---------- Small phones (480px and below): keep the top bar compact ---------- */
 @media (max-width: 480px) {
-  .sidebar__link {
+  .pf-sidebar__link {
     padding: 8px 10px;
     font-size: 0.9rem;
   }
 
   /* The icons beside the links would not fit, so only the words show */
-  .sidebar__link .icon {
+  .pf-sidebar__link .pf-icon {
     display: none;
   }
 
-  .sidebar__logout {
+  .pf-sidebar__logout {
     gap: 6px;
     font-size: 0.9rem;
     text-transform: none;
   }
 
-  .sidebar__logout .icon {
+  .pf-sidebar__logout .pf-icon {
     width: 18px;
     height: 18px;
   }

@@ -4,14 +4,14 @@
  */
 
 /* Every icon drawn by icon() in dashboard.js */
-.icon {
+.pf-icon {
   flex-shrink: 0;
 }
 
 /* ---------- Top bar, greeting and user chip ---------- */
 
 /* A thin line under the top bar, like the Figma */
-.topbar {
+.pf-topbar {
   padding-bottom: 12px;
   border-bottom: 1px solid rgba(11, 29, 38, 0.12);
 }
@@ -23,13 +23,13 @@
   font-weight: 500;
 }
 
-.greeting__title {
+.pf-greeting__title {
   font-size: 2rem;
   margin: 0 0 4px;
   color: var(--color-navy);
 }
 
-.greeting__sub {
+.pf-greeting__sub {
   margin: 0 0 8px;
   color: var(--color-muted);
 }
@@ -40,12 +40,12 @@
   gap: 12px;
 }
 
-.user-chip__bell {
+.pf-user-chip__bell {
   display: flex;
   color: var(--color-navy);
 }
 
-.user-chip__avatar {
+.pf-user-chip__avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -57,11 +57,11 @@
   font-weight: 700;
 }
 
-.user-chip__name {
+.pf-user-chip__name {
   font-weight: 600;
 }
 
-.user-chip__chevron {
+.pf-user-chip__chevron {
   display: flex;
   color: var(--color-muted);
 }
@@ -69,7 +69,7 @@
 /* ---------- Status card (IN / OUT) ---------- */
 
 /* The card is a row: icon | status | time */
-.status-card {
+.pf-status-card {
   display: flex;
   align-items: center;
   gap: 20px;
@@ -78,18 +78,18 @@
 }
 
 /* IN = lime green, OUT = grey */
-.status-card--in {
+.pf-status-card--in {
   background: var(--color-lime);
   color: var(--color-navy);
 }
 
-.status-card--out {
+.pf-status-card--out {
   background: var(--color-out-bg);
   color: var(--color-text);
 }
 
 /* Round icon with the tick */
-.status-card__icon {
+.pf-status-card__icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,36 +100,36 @@
 }
 
 /* The status part and the time part stack their text */
-.status-card__main,
-.status-card__time {
+.pf-status-card__main,
+.pf-status-card__time {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
 /* A thin line between the status part and the time part */
-.status-card__time {
+.pf-status-card__time {
   padding-left: 20px;
   border-left: 1px solid rgba(11, 29, 38, 0.3);
 }
 
-.status-card__label {
+.pf-status-card__label {
   font-size: 0.9rem;
   font-weight: bold;
 }
 
-.status-card__value {
+.pf-status-card__value {
   font-size: 2.5rem;
   font-weight: bold;
   line-height: 1;
 }
 
 /* The time is smaller than the IN / OUT text */
-.status-card__value--time {
+.pf-status-card__value--time {
   font-size: 1.75rem;
 }
 
-.status-card__pill {
+.pf-status-card__pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -141,21 +141,21 @@
 }
 
 /* The small dot inside the pill */
-.status-card__dot {
+.pf-status-card__dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--color-teal);
 }
 
-.status-card__date {
+.pf-status-card__date {
   font-size: 0.8rem;
 }
 
 /* ---------- Clocked Out card (grey card beside the status card) ---------- */
 
 /* The card stacks two parts: the clock row on top, the last updated box below */
-.clocked-out-card {
+.pf-clocked-out-card {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -167,13 +167,13 @@
 }
 
 /* Top row: clock icon | label and time | note on the right */
-.clocked-out-card__top {
+.pf-clocked-out-card__top {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.clocked-out-card__icon {
+.pf-clocked-out-card__icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -184,33 +184,33 @@
   color: var(--color-teal);
 }
 
-.clocked-out-card__main {
+.pf-clocked-out-card__main {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.clocked-out-card__label {
+.pf-clocked-out-card__label {
   font-size: 0.9rem;
   font-weight: bold;
 }
 
 /* The big --:-- (or the clock-out time) */
-.clocked-out-card__time {
+.pf-clocked-out-card__time {
   font-size: 1.75rem;
   font-weight: bold;
   line-height: 1;
 }
 
 /* margin-left: auto pushes the note to the right edge */
-.clocked-out-card__note {
+.pf-clocked-out-card__note {
   margin-left: auto;
   font-size: 0.8rem;
   color: var(--color-muted);
 }
 
 /* The white "Last updated" box with a teal outline */
-.clocked-out-card__updated {
+.pf-clocked-out-card__updated {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -221,22 +221,22 @@
   background: #ffffff;
 }
 
-.clocked-out-card__updated-text {
+.pf-clocked-out-card__updated-text {
   display: flex;
   flex-direction: column;
 }
 
-.clocked-out-card__updated-label {
+.pf-clocked-out-card__updated-label {
   font-size: 0.7rem;
   color: var(--color-muted);
 }
 
-.clocked-out-card__updated-value {
+.pf-clocked-out-card__updated-value {
   font-size: 0.85rem;
 }
 
 /* The small teal dot on the right of the box */
-.clocked-out-card__live {
+.pf-clocked-out-card__live {
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -252,7 +252,7 @@
   gap: 24px;
 }
 
-.hours-card {
+.pf-hours-card {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -264,12 +264,12 @@
   color: var(--color-text);
 }
 
-.hours-card__label {
+.pf-hours-card__label {
   font-size: 0.9rem;
   font-weight: bold;
 }
 
-.hours-card__value {
+.pf-hours-card__value {
   font-size: 2rem;
   font-weight: bold;
   line-height: 1;
@@ -277,7 +277,7 @@
 
 /* ---------- Attendance Overview (area chart) ---------- */
 
-.chart-card {
+.pf-chart-card {
   padding: 20px 24px;
   border-radius: var(--radius-card);
   background: #ffffff;
@@ -286,7 +286,7 @@
 }
 
 /* Title with icon on the left, "This Month" box on the right */
-.chart-card__header {
+.pf-chart-card__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -294,20 +294,20 @@
   margin-bottom: 16px;
 }
 
-.chart-card__heading {
+.pf-chart-card__heading {
   display: flex;
   align-items: center;
   gap: 10px;
   color: var(--color-teal);
 }
 
-.chart-card__title {
+.pf-chart-card__title {
   margin: 0;
   font-size: 1.1rem;
   color: var(--color-navy);
 }
 
-.chart-card__filter {
+.pf-chart-card__filter {
   padding: 6px 12px;
   border: 1px solid rgba(11, 29, 38, 0.15);
   border-radius: 8px;
@@ -317,42 +317,42 @@
 }
 
 /* The drawing scales to the width of the card */
-.chart__svg {
+.pf-chart__svg {
   display: block;
   width: 100%;
   height: auto;
 }
 
-.chart__grid {
+.pf-chart__grid {
   stroke: rgba(11, 29, 38, 0.12);
   stroke-width: 1;
 }
 
-.chart__area {
+.pf-chart__area {
   fill: var(--color-teal);
   fill-opacity: 0.35;
 }
 
-.chart__line {
+.pf-chart__line {
   fill: none;
   stroke: var(--color-teal);
   stroke-width: 2.5;
 }
 
-.chart__dot {
+.pf-chart__dot {
   fill: var(--color-teal);
   stroke: #ffffff;
   stroke-width: 1.5;
 }
 
-.chart__axis {
+.pf-chart__axis {
   fill: #6b7280;
   font-size: 11px;
 }
 
 /* ---------- This Week summary card ---------- */
 
-.week-card {
+.pf-week-card {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -365,7 +365,7 @@
 }
 
 /* Calendar icon beside the title, kept on the left */
-.week-card__header {
+.pf-week-card__header {
   display: flex;
   align-items: center;
   align-self: flex-start;
@@ -374,38 +374,38 @@
   color: var(--color-teal);
 }
 
-.week-card__title {
+.pf-week-card__title {
   margin: 0;
   font-size: 1.1rem;
   color: var(--color-navy);
 }
 
-.week-card__big {
+.pf-week-card__big {
   font-size: 2.4rem;
   font-weight: 700;
   line-height: 1.1;
 }
 
-.week-card__label {
+.pf-week-card__label {
   color: var(--color-muted);
   font-size: 0.9rem;
 }
 
-.week-card__divider {
+.pf-week-card__divider {
   width: 100%;
   margin: 16px 0;
   border: 0;
   border-top: 1px solid rgba(11, 29, 38, 0.3);
 }
 
-.week-card__rate-row {
+.pf-week-card__rate-row {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
 /* The ring: --rate (0 to 100) is set by the JavaScript */
-.week-card__ring {
+.pf-week-card__ring {
   position: relative;
   flex-shrink: 0;
   width: 72px;
@@ -417,7 +417,7 @@
 }
 
 /* White circle in the middle to make it a ring */
-.week-card__ring::before {
+.pf-week-card__ring::before {
   content: "";
   position: absolute;
   inset: 8px;
@@ -425,20 +425,20 @@
   background: var(--color-card);
 }
 
-.week-card__rate {
+.pf-week-card__rate {
   position: relative;
   font-size: 0.85rem;
   font-weight: 700;
 }
 
-.week-card__rate-label {
+.pf-week-card__rate-label {
   font-size: 0.9rem;
   text-align: left;
 }
 
 /* ---------- Recent records (Attendance History) ---------- */
 
-.records-card {
+.pf-records-card {
   padding: 20px 24px;
   border-radius: var(--radius-card);
   background: #ffffff;
@@ -447,7 +447,7 @@
 }
 
 /* Title with icon on the left, View All button on the right */
-.records-card__header {
+.pf-records-card__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -455,21 +455,21 @@
   margin-bottom: 12px;
 }
 
-.records-card__heading {
+.pf-records-card__heading {
   display: flex;
   align-items: center;
   gap: 10px;
   color: var(--color-teal);
 }
 
-.records-card__title {
+.pf-records-card__title {
   margin: 0;
   font-size: 1.1rem;
   color: var(--color-navy);
 }
 
 /* Dark View All button */
-.records-card__viewall {
+.pf-records-card__viewall {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -482,13 +482,13 @@
   text-decoration: none;
 }
 
-.records-card__empty {
+.pf-records-card__empty {
   color: #6b7280;
 }
 
 /* The header row and each record share the same four columns */
-.records-head,
-.record {
+.pf-records-head,
+.pf-record {
   display: grid;
   grid-template-columns: 1.8fr 1fr 1fr 1fr;
   gap: 12px;
@@ -496,7 +496,7 @@
 }
 
 /* Grey header row: Date, Clock In, Clocked Out, Status */
-.records-head {
+.pf-records-head {
   padding: 8px 12px;
   border-radius: 6px;
   background: #e9eef1;
@@ -505,35 +505,35 @@
 }
 
 /* Remove the bullet points and the default list spacing */
-.records-list {
+.pf-records-list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 /* One row per record, with a thin line between rows */
-.record {
+.pf-record {
   padding: 10px 12px;
   border-bottom: 1px solid rgba(11, 29, 38, 0.1);
   font-size: 0.9rem;
 }
 
-.record:last-child {
+.pf-record:last-child {
   border-bottom: none;
 }
 
-.record__cell {
+.pf-record__cell {
   min-width: 0;
 }
 
 /* Corrected records: amber bar on the left and a tinted background */
-.record--corrected {
+.pf-record--corrected {
   border-left: 4px solid #f59e0b;
   background: #fffbeb;
 }
 
 /* The "Corrected" tag next to the date */
-.record__tag {
+.pf-record__tag {
   display: inline-block;
   margin-left: 8px;
   padding: 2px 10px;
@@ -545,7 +545,7 @@
 }
 
 /* Late / Present pill in the Status column */
-.status-pill {
+.pf-status-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -554,39 +554,39 @@
   font-size: 0.8rem;
 }
 
-.status-pill__dot {
+.pf-status-pill__dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
 }
 
-.status-pill--present {
+.pf-status-pill--present {
   background: #e6f7c8;
 }
 
-.status-pill--present .status-pill__dot {
+.pf-status-pill--present .pf-status-pill__dot {
   background: #5cb82a;
 }
 
-.status-pill--late {
+.pf-status-pill--late {
   background: #fdeaea;
 }
 
-.status-pill--late .status-pill__dot {
+.pf-status-pill--late .pf-status-pill__dot {
   background: #e53935;
 }
 
-.status-pill--neutral {
+.pf-status-pill--neutral {
   background: #e9eef1;
 }
 
-.status-pill--neutral .status-pill__dot {
+.pf-status-pill--neutral .pf-status-pill__dot {
   background: var(--color-muted);
 }
 
 /* ---------- Need Help card ---------- */
 
-.help-card {
+.pf-help-card {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -600,24 +600,24 @@
   text-align: center;
 }
 
-.help-card__icon {
+.pf-help-card__icon {
   display: flex;
   color: var(--color-teal);
 }
 
-.help-card__title {
+.pf-help-card__title {
   margin: 0;
   font-size: 1.25rem;
 }
 
-.help-card__text {
+.pf-help-card__text {
   margin: 0 0 8px;
   color: var(--color-muted);
   font-size: 0.85rem;
 }
 
 /* Dark Contact HR button */
-.help-card__button {
+.pf-help-card__button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -633,7 +633,7 @@
 /* ---------- Footer ---------- */
 
 /* Navy on the left, a slanted lime stripe, then teal on the right */
-.site-footer {
+.pf-site-footer {
   margin-top: 24px;
   overflow: hidden;
   border-radius: var(--radius-card);
@@ -646,32 +646,32 @@
   color: #ffffff;
 }
 
-.footer__inner {
+.pf-footer__inner {
   display: grid;
   grid-template-columns: 54% 1fr;
 }
 
-.footer__brand {
+.pf-footer__brand {
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding: 28px 32px;
 }
 
-.footer__logo {
+.pf-footer__logo {
   font-size: 1.5rem;
   font-weight: 800;
   font-style: italic;
 }
 
-.footer__message {
+.pf-footer__message {
   margin: 0;
   max-width: 34ch;
   font-size: 0.9rem;
   line-height: 1.5;
 }
 
-.footer__contact {
+.pf-footer__contact {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -679,17 +679,17 @@
   font-size: 0.85rem;
 }
 
-.footer__heading {
+.pf-footer__heading {
   color: var(--color-lime);
   font-weight: 700;
 }
 
-.footer__address {
+.pf-footer__address {
   font-style: normal;
   line-height: 1.7;
 }
 
-.footer__small {
+.pf-footer__small {
   font-size: 0.7rem;
   opacity: 0.8;
 }
@@ -698,33 +698,33 @@
 
 /* 768px and below: the footer stacks, with a lime line between the parts */
 @media (max-width: 768px) {
-  .site-footer {
+  .pf-site-footer {
     background: var(--color-teal);
   }
 
-  .footer__inner {
+  .pf-footer__inner {
     grid-template-columns: 1fr;
   }
 
-  .footer__brand {
+  .pf-footer__brand {
     background: var(--color-navy);
     border-bottom: 4px solid var(--color-lime);
   }
 
-  .footer__contact {
+  .pf-footer__contact {
     padding: 24px 32px;
   }
 }
 
 /* 480px and below: tighter cards and a table that turns into stacked rows */
 @media (max-width: 480px) {
-  .greeting__title {
+  .pf-greeting__title {
     font-size: 1.5rem;
   }
 
   /* Only the bell and the round avatar show next to the date */
-  .user-chip__name,
-  .user-chip__chevron {
+  .pf-user-chip__name,
+  .pf-user-chip__chevron {
     display: none;
   }
 
@@ -732,71 +732,71 @@
     grid-template-columns: 1fr;
   }
 
-  .status-card {
+  .pf-status-card {
     gap: 12px;
     padding: 16px;
   }
 
-  .status-card__icon {
+  .pf-status-card__icon {
     width: 44px;
     height: 44px;
   }
 
-  .status-card__time {
+  .pf-status-card__time {
     padding-left: 12px;
   }
 
-  .status-card__value {
+  .pf-status-card__value {
     font-size: 2rem;
   }
 
-  .status-card__value--time {
+  .pf-status-card__value--time {
     font-size: 1.35rem;
   }
 
   /* Keep these on one line instead of wrapping */
-  .status-card__label,
-  .status-card__value--time,
-  .status-card__pill {
+  .pf-status-card__label,
+  .pf-status-card__value--time,
+  .pf-status-card__pill {
     white-space: nowrap;
   }
 
-  .clocked-out-card,
-  .hours-card,
-  .records-card,
-  .chart-card,
-  .week-card,
-  .help-card {
+  .pf-clocked-out-card,
+  .pf-hours-card,
+  .pf-records-card,
+  .pf-chart-card,
+  .pf-week-card,
+  .pf-help-card {
     padding: 16px;
   }
 
   /* The note drops under the time instead of squeezing beside it */
-  .clocked-out-card__top {
+  .pf-clocked-out-card__top {
     flex-wrap: wrap;
   }
 
-  .clocked-out-card__note {
+  .pf-clocked-out-card__note {
     margin-left: 0;
     width: 100%;
   }
 
   /* Table: no header row, date on its own line, then three small columns */
-  .records-head {
+  .pf-records-head {
     display: none;
   }
 
-  .record {
+  .pf-record {
     grid-template-columns: 1fr 1fr 1fr;
     gap: 6px 12px;
   }
 
-  .record__cell--date {
+  .pf-record__cell--date {
     grid-column: 1 / -1;
     font-weight: bold;
   }
 
   /* Small grey label above each time and the status */
-  .record__cell:not(.record__cell--date)::before {
+  .pf-record__cell:not(.pf-record__cell--date)::before {
     content: attr(data-label);
     display: block;
     margin-bottom: 2px;
@@ -808,30 +808,30 @@
 /* ---------- Small fixes ---------- */
 
 /* The amber bar takes 4px, so the padding gives 4px back and the columns line up */
-.record--corrected {
+.pf-record--corrected {
   padding-left: 8px;
 }
 
 /* Keep the View All button on one line */
-.records-card__viewall {
+.pf-records-card__viewall {
   flex-shrink: 0;
   white-space: nowrap;
 }
 
 /* Small phones: the drawing shrinks, so its text needs to be bigger to stay readable */
 @media (max-width: 480px) {
-  .chart__axis {
+  .pf-chart__axis {
     font-size: 16px;
   }
 
-  .chart__dot {
+  .pf-chart__dot {
     r: 5;
   }
 }
 
 /* Small phones: keep the date under the clock-in time on one line */
 @media (max-width: 480px) {
-  .status-card__date {
+  .pf-status-card__date {
     font-size: 0.75rem;
     white-space: nowrap;
   }
@@ -840,11 +840,11 @@
 /* ---------- Final touches to match the Figma ---------- */
 
 /* Small lime dot on the bell */
-.user-chip__bell {
+.pf-user-chip__bell {
   position: relative;
 }
 
-.user-chip__bell::after {
+.pf-user-chip__bell::after {
   content: "";
   position: absolute;
   top: -1px;
@@ -856,28 +856,28 @@
 }
 
 /* Logo text in lime */
-.sidebar__logo,
-.footer__logo {
+.pf-sidebar__logo,
+.pf-footer__logo {
   color: var(--color-lime);
 }
 
 /* Chart area a little darker */
-.chart__area {
+.pf-chart__area {
   fill-opacity: 0.5;
 }
 
 /* Bigger sidebar text on larger screens only, so the phone top bar stays compact */
 @media (min-width: 769px) {
-  .sidebar__link {
+  .pf-sidebar__link {
     font-size: 1.05rem;
   }
 
-  .sidebar__access-pill {
+  .pf-sidebar__access-pill {
     padding: 6px 16px;
     font-size: 1rem;
   }
 
-  .sidebar__access-role {
+  .pf-sidebar__access-role {
     font-size: 1.25rem;
   }
 }

@@ -3,7 +3,7 @@
  * Builds the Employee Dashboard on the page.
  *
  * Each render function takes one piece of the API data and writes it into
- * its own section of dashboard.php. The field names (status, hours.today,
+ * its own section of index.php. The field names (status, hours.today,
  * hours.week) come from the JSON contract in the Team 3 brief.
  */
 
@@ -25,7 +25,7 @@ const ICON_PATHS = {
 
 function icon(name, size) {
   const px = size || 20;
-  return `<svg class="icon" width="${px}" height="${px}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PATHS[name]}</svg>`;
+  return `<svg class="pf-icon" width="${px}" height="${px}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PATHS[name]}</svg>`;
 }
 
 // ---------- Status card ----------
@@ -39,18 +39,18 @@ function renderStatusBadge(status, clockedInAt, dateText) {
   const isIn = status === "IN";
 
   // The class decides the colour (see component.css)
-  el.className = "status-card " + (isIn ? "status-card--in" : "status-card--out");
+  el.className = "pf-status-card " + (isIn ? "pf-status-card--in" : "pf-status-card--out");
   el.innerHTML = `
-    <div class="status-card__icon">${icon(isIn ? "check" : "dash", 30)}</div>
-    <div class="status-card__main">
-      <span class="status-card__label">Current Status</span>
-      <span class="status-card__value">${isIn ? "IN" : "OUT"}</span>
-      <span class="status-card__pill"><span class="status-card__dot"></span>${isIn ? "Clocked In" : "Clocked Out"}</span>
+    <div class="pf-status-card__icon">${icon(isIn ? "check" : "dash", 30)}</div>
+    <div class="pf-status-card__main">
+      <span class="pf-status-card__label">Current Status</span>
+      <span class="pf-status-card__value">${isIn ? "IN" : "OUT"}</span>
+      <span class="pf-status-card__pill"><span class="pf-status-card__dot"></span>${isIn ? "Clocked In" : "Clocked Out"}</span>
     </div>
-    <div class="status-card__time">
-      <span class="status-card__label">Clocked In At</span>
-      <span class="status-card__value status-card__value--time">${clockedInAt || "--:--"}</span>
-      <span class="status-card__date">${dateText}</span>
+    <div class="pf-status-card__time">
+      <span class="pf-status-card__label">Clocked In At</span>
+      <span class="pf-status-card__value pf-status-card__value--time">${clockedInAt || "--:--"}</span>
+      <span class="pf-status-card__date">${dateText}</span>
     </div>
   `;
 }
@@ -64,22 +64,22 @@ function renderStatusBadge(status, clockedInAt, dateText) {
 function renderClockedOut(clockedOutAt, lastUpdated) {
   const el = document.getElementById("clocked-out");
 
-  el.className = "clocked-out-card";
+  el.className = "pf-clocked-out-card";
   el.innerHTML = `
-    <div class="clocked-out-card__top">
-      <span class="clocked-out-card__icon">${icon("clock", 28)}</span>
-      <div class="clocked-out-card__main">
-        <span class="clocked-out-card__label">Clocked Out</span>
-        <span class="clocked-out-card__time">${clockedOutAt || "--:--"}</span>
+    <div class="pf-clocked-out-card__top">
+      <span class="pf-clocked-out-card__icon">${icon("clock", 28)}</span>
+      <div class="pf-clocked-out-card__main">
+        <span class="pf-clocked-out-card__label">Clocked Out</span>
+        <span class="pf-clocked-out-card__time">${clockedOutAt || "--:--"}</span>
       </div>
-      <span class="clocked-out-card__note">${clockedOutAt ? "Shift ended" : "Not yet clocked out"}</span>
+      <span class="pf-clocked-out-card__note">${clockedOutAt ? "Shift ended" : "Not yet clocked out"}</span>
     </div>
-    <div class="clocked-out-card__updated">
-      <div class="clocked-out-card__updated-text">
-        <span class="clocked-out-card__updated-label">Last updated</span>
-        <span class="clocked-out-card__updated-value">${lastUpdated}</span>
+    <div class="pf-clocked-out-card__updated">
+      <div class="pf-clocked-out-card__updated-text">
+        <span class="pf-clocked-out-card__updated-label">Last updated</span>
+        <span class="pf-clocked-out-card__updated-value">${lastUpdated}</span>
       </div>
-      <span class="clocked-out-card__live"></span>
+      <span class="pf-clocked-out-card__live"></span>
     </div>
   `;
 }
@@ -96,13 +96,13 @@ function renderHoursSummary(hours) {
   // Number() converts text to a number, and toFixed(2) always shows
   // two decimals, for example 4.50
   el.innerHTML = `
-    <div class="hours-card">
-      <span class="hours-card__label">Today</span>
-      <span class="hours-card__value">${Number(hours.today).toFixed(2)} h</span>
+    <div class="pf-hours-card">
+      <span class="pf-hours-card__label">Today</span>
+      <span class="pf-hours-card__value">${Number(hours.today).toFixed(2)} h</span>
     </div>
-    <div class="hours-card">
-      <span class="hours-card__label">This week</span>
-      <span class="hours-card__value">${Number(hours.week).toFixed(2)} h</span>
+    <div class="pf-hours-card">
+      <span class="pf-hours-card__label">This week</span>
+      <span class="pf-hours-card__value">${Number(hours.week).toFixed(2)} h</span>
     </div>
   `;
 }
@@ -138,7 +138,7 @@ function statusPill(status) {
   let kind = "neutral";
   if (lower === "late") kind = "late";
   if (lower === "present") kind = "present";
-  return `<span class="status-pill status-pill--${kind}"><span class="status-pill__dot"></span>${text}</span>`;
+  return `<span class="pf-status-pill pf-status-pill--${kind}"><span class="pf-status-pill__dot"></span>${text}</span>`;
 }
 
 // Recent records: a table of the last 10 attendance records.
@@ -150,45 +150,45 @@ function statusPill(status) {
 // Writes into: <section id="recent-records">
 function renderRecentRecords(records) {
   const el = document.getElementById("recent-records");
-  el.className = "records-card";
+  el.className = "pf-records-card";
 
   const header = `
-    <div class="records-card__header">
-      <div class="records-card__heading">
+    <div class="pf-records-card__header">
+      <div class="pf-records-card__heading">
         ${icon("list", 20)}
-        <h2 class="records-card__title">Attendance History</h2>
+        <h2 class="pf-records-card__title">Attendance History</h2>
       </div>
-      <a href="#" class="records-card__viewall">View All ${icon("arrow", 14)}</a>
+      <a href="#" class="pf-records-card__viewall">View All ${icon("arrow", 14)}</a>
     </div>
   `;
 
   // No records yet
   if (!records || records.length === 0) {
-    el.innerHTML = header + '<p class="records-card__empty">No records yet.</p>';
+    el.innerHTML = header + '<p class="pf-records-card__empty">No records yet.</p>';
     return;
   }
 
   const rows = records.map(function (record) {
     // The database may send is_corrected as 0 or 1, so convert it first
     const isCorrected = Number(record.is_corrected) === 1;
-    const tag = isCorrected ? '<span class="record__tag">Corrected</span>' : "";
+    const tag = isCorrected ? '<span class="pf-record__tag">Corrected</span>' : "";
 
     return `
-      <li class="record ${isCorrected ? "record--corrected" : ""}">
-        <div class="record__cell record__cell--date">${formatRecordDate(record.clock_in)} ${tag}</div>
-        <div class="record__cell" data-label="Clock In">${formatRecordTime(record.clock_in)}</div>
-        <div class="record__cell" data-label="Clocked Out">${formatRecordTime(record.clock_out)}</div>
-        <div class="record__cell" data-label="Status">${statusPill(record.status)}</div>
+      <li class="pf-record ${isCorrected ? "pf-record--corrected" : ""}">
+        <div class="pf-record__cell pf-record__cell--date">${formatRecordDate(record.clock_in)} ${tag}</div>
+        <div class="pf-record__cell" data-label="Clock In">${formatRecordTime(record.clock_in)}</div>
+        <div class="pf-record__cell" data-label="Clocked Out">${formatRecordTime(record.clock_out)}</div>
+        <div class="pf-record__cell" data-label="Status">${statusPill(record.status)}</div>
       </li>
     `;
   });
 
   el.innerHTML = `
     ${header}
-    <div class="records-head" aria-hidden="true">
+    <div class="pf-records-head" aria-hidden="true">
       <span>Date</span><span>Clock In</span><span>Clocked Out</span><span>Status</span>
     </div>
-    <ul class="records-list">${rows.join("")}</ul>
+    <ul class="pf-records-list">${rows.join("")}</ul>
   `;
 }
 
@@ -217,27 +217,27 @@ function renderGreeting(fullName, today) {
   });
 
   document.getElementById("greeting").innerHTML = `
-    <h1 class="greeting__title">Good ${part}, ${firstName}.</h1>
-    <p class="greeting__sub">Here’s your attendance overview for today.</p>
+    <h1 class="pf-greeting__title">Good ${part}, ${firstName}.</h1>
+    <p class="pf-greeting__sub">Here’s your attendance overview for today.</p>
   `;
   document.getElementById("today-date").innerHTML = `
     ${icon("calendar", 20)}<span>${dateText}</span>
   `;
   document.getElementById("user-chip").innerHTML = `
-    <span class="user-chip__bell">${icon("bell", 20)}</span>
-    <span class="user-chip__avatar">${initials}</span>
-    <span class="user-chip__name">${fullName}</span>
-    <span class="user-chip__chevron">${icon("chevron", 16)}</span>
+    <span class="pf-user-chip__bell">${icon("bell", 20)}</span>
+    <span class="pf-user-chip__avatar">${initials}</span>
+    <span class="pf-user-chip__name">${fullName}</span>
+    <span class="pf-user-chip__chevron">${icon("chevron", 16)}</span>
   `;
-  
+
   // The user card in the sidebar (only exists on larger screens)
   const sidebarUser = document.getElementById("sidebar-user");
   if (sidebarUser) {
     sidebarUser.innerHTML = `
-      <span class="sidebar-user__avatar">${initials}</span>
-      <div class="sidebar-user__text">
-        <span class="sidebar-user__name">${fullName}</span>
-        <span class="sidebar-user__role">Employee</span>
+      <span class="pf-sidebar-user__avatar">${initials}</span>
+      <div class="pf-sidebar-user__text">
+        <span class="pf-sidebar-user__name">${fullName}</span>
+        <span class="pf-sidebar-user__role">Employee</span>
       </div>
     `;
   }
@@ -252,20 +252,20 @@ function renderWeekSummary(daysPresent, workingDays) {
   const el = document.getElementById("week-summary");
   const rate = workingDays > 0 ? Math.round((daysPresent / workingDays) * 100) : 0;
 
-  el.className = "week-card";
+  el.className = "pf-week-card";
   el.innerHTML = `
-    <div class="week-card__header">
+    <div class="pf-week-card__header">
       ${icon("calendar", 20)}
-      <h2 class="week-card__title">This Week</h2>
+      <h2 class="pf-week-card__title">This Week</h2>
     </div>
-    <div class="week-card__big">${daysPresent} / ${workingDays}</div>
-    <div class="week-card__label">Days Present</div>
-    <hr class="week-card__divider">
-    <div class="week-card__rate-row">
-      <div class="week-card__ring" style="--rate: ${rate}">
-        <span class="week-card__rate">${rate}%</span>
+    <div class="pf-week-card__big">${daysPresent} / ${workingDays}</div>
+    <div class="pf-week-card__label">Days Present</div>
+    <hr class="pf-week-card__divider">
+    <div class="pf-week-card__rate-row">
+      <div class="pf-week-card__ring" style="--rate: ${rate}">
+        <span class="pf-week-card__rate">${rate}%</span>
       </div>
-      <span class="week-card__rate-label">Attendance Rate</span>
+      <span class="pf-week-card__rate-label">Attendance Rate</span>
     </div>
   `;
 }
@@ -278,15 +278,15 @@ function renderWeekSummary(daysPresent, workingDays) {
 // Writes into: <section id="attendance-chart">
 function renderAttendanceChart(days) {
   const el = document.getElementById("attendance-chart");
-  el.className = "chart-card";
+  el.className = "pf-chart-card";
 
   const header = `
-    <div class="chart-card__header">
-      <div class="chart-card__heading">
+    <div class="pf-chart-card__header">
+      <div class="pf-chart-card__heading">
         ${icon("bars", 20)}
-        <h2 class="chart-card__title">Attendance Overview</h2>
+        <h2 class="pf-chart-card__title">Attendance Overview</h2>
       </div>
-      <select class="chart-card__filter" aria-label="Time range">
+      <select class="pf-chart-card__filter" aria-label="Time range">
         <option>This Month</option>
       </select>
     </div>
@@ -294,7 +294,7 @@ function renderAttendanceChart(days) {
 
   // No data: show the header and a short message
   if (!days || days.length === 0) {
-    el.innerHTML = header + '<p class="records-card__empty">No data yet.</p>';
+    el.innerHTML = header + '<p class="pf-records-card__empty">No data yet.</p>';
     return;
   }
 
@@ -335,25 +335,25 @@ function renderAttendanceChart(days) {
   const gridLines = [0, 25, 50, 75, 100].map(function (tick) {
     const y = baseY - (tick / 100) * plotH;
     return `
-      <line class="chart__grid" x1="${left}" x2="${width - right}" y1="${y}" y2="${y}"></line>
-      <text class="chart__axis" x="${left - 8}" y="${y + 4}" text-anchor="end">${tick}</text>
+      <line class="pf-chart__grid" x1="${left}" x2="${width - right}" y1="${y}" y2="${y}"></line>
+      <text class="pf-chart__axis" x="${left - 8}" y="${y + 4}" text-anchor="end">${tick}</text>
     `;
   });
 
   // A dot on each point and the day label underneath
   const dots = points.map(function (p) {
-    return `<circle class="chart__dot" cx="${p.x}" cy="${p.y}" r="4"></circle>`;
+    return `<circle class="pf-chart__dot" cx="${p.x}" cy="${p.y}" r="4"></circle>`;
   });
   const labels = points.map(function (p) {
-    return `<text class="chart__axis" x="${p.x}" y="${height - 8}" text-anchor="middle">${p.label}</text>`;
+    return `<text class="pf-chart__axis" x="${p.x}" y="${height - 8}" text-anchor="middle">${p.label}</text>`;
   });
 
   el.innerHTML = `
     ${header}
-    <svg class="chart__svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Attendance overview chart">
+    <svg class="pf-chart__svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Attendance overview chart">
       ${gridLines.join("")}
-      <path class="chart__area" d="${area}"></path>
-      <path class="chart__line" d="${line}"></path>
+      <path class="pf-chart__area" d="${area}"></path>
+      <path class="pf-chart__line" d="${line}"></path>
       ${dots.join("")}
       ${labels.join("")}
     </svg>
@@ -367,12 +367,12 @@ function renderAttendanceChart(days) {
 function renderHelpCard() {
   const el = document.getElementById("help-card");
 
-  el.className = "help-card";
+  el.className = "pf-help-card";
   el.innerHTML = `
-    <span class="help-card__icon">${icon("headset", 40)}</span>
-    <h2 class="help-card__title">Need Help?</h2>
-    <p class="help-card__text">Contact your HR department for assistance.</p>
-    <a href="#" class="help-card__button">${icon("mail", 16)}Contact HR</a>
+    <span class="pf-help-card__icon">${icon("headset", 40)}</span>
+    <h2 class="pf-help-card__title">Need Help?</h2>
+    <p class="pf-help-card__text">Contact your HR department for assistance.</p>
+    <a href="#" class="pf-help-card__button">${icon("mail", 16)}Contact HR</a>
   `;
 }
 
@@ -384,21 +384,21 @@ function renderFooter() {
   const el = document.getElementById("site-footer");
 
   el.innerHTML = `
-    <div class="footer__inner">
-      <div class="footer__brand">
-        <span class="footer__logo">LC Attends</span>
-        <p class="footer__message">Life Choices invests in young people from all over South Africa, so every one of them has a fair chance in life.</p>
+    <div class="pf-footer__inner">
+      <div class="pf-footer__brand">
+        <span class="pf-footer__logo">LC Attends</span>
+        <p class="pf-footer__message">Life Choices invests in young people from all over South Africa, so every one of them has a fair chance in life.</p>
       </div>
-      <div class="footer__contact">
-        <span class="footer__heading">Visit or contact us</span>
-        <address class="footer__address">
+      <div class="pf-footer__contact">
+        <span class="pf-footer__heading">Visit or contact us</span>
+        <address class="pf-footer__address">
           314 Imam Haron Rd, Lansdowne,<br>
           Cape Town, 7780<br>
           +27 (0) 21 696 4157<br>
           theteam@lcstudio.co.za<br>
           www.lcstudio.co.za
         </address>
-        <span class="footer__small">Employee access only · LC Attends System</span>
+        <span class="pf-footer__small">Employee access only · LC Attends System</span>
       </div>
     </div>
   `;
