@@ -5,27 +5,54 @@ declare(strict_types=1);
 require_once __DIR__ . '/../backend/config/config.php';
 require_once __DIR__ . '/../backend/includes/functions.php';
 
-// The PHP dev server falls back to this file for unknown /api/* paths.
-// Return a clean JSON 404 so the dashboard can use its draft data instead
-// of being redirected to the login page.
-if (strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') === 0) {
+session_start();
+
+$requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
+$clientAddress = $_SERVER['REMOTE_ADDR'] ?? '';
+$localPreview = in_array($clientAddress, ['127.0.0.1', '::1'], true) && isset($_GET['preview']);
+
+/*
+ * This file is the front controller for the frontend web root.
+ * Route the dashboard API request through to the backend endpoint so the
+ * browser never needs to reach backend/ directly.
+ */
+$isDashboardApi = strpos($requestPath, '/api/dashboard') === 0
+    || (($_GET['api'] ?? '') === 'dashboard');
+
+if ($isDashboardApi) {
+    header('Content-Type: application/json');
+
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+        http_response_code(405);
+        echo json_encode(['error' => 'Method not allowed']);
+        exit;
+    }
+
+    if (empty($_SESSION['staff_id']) && !$localPreview) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Not authenticated']);
+        exit;
+    }
+
+    require __DIR__ . '/../backend/api/dashboard.php';
+    exit;
+}
+
+// Unknown API paths get a clean JSON 404 instead of an HTML login redirect.
+if (strpos($requestPath, '/api/') === 0) {
     http_response_code(404);
     header('Content-Type: application/json');
     echo json_encode(['error' => 'API endpoint not implemented']);
     exit;
 }
 
-session_start();
-
 // Routing guard: only authenticated staff may reach the dashboard.
-// Login sets $_SESSION['staff_id'] before redirecting here.
-// Local-only preview: http://localhost:8000/index.php?preview=1
-$clientAddress = $_SERVER['REMOTE_ADDR'] ?? '';
-$localPreview = in_array($clientAddress, ['127.0.0.1', '::1'], true) && isset($_GET['preview']);
-
+// Login sets $_SESSION['staff_id'] before redirecting back to this page.
 if (empty($_SESSION['staff_id']) && !$localPreview) {
     redirectTo('login.php');
 }
+
+header('Cache-Control: no-store');
 ?>
 <!doctype html>
 <html lang="en">
@@ -39,381 +66,410 @@ if (empty($_SESSION['staff_id']) && !$localPreview) {
     <link rel="stylesheet" href="assets/css/component.css">
 </head>
 <body>
-    <?php
-    /*
-     * Component contract to agree with Phelisa (frontend3-dashboard-ui):
-     *
-     * #dashboard-summary         data-component="SummaryCards"
-     *     expects: { onsiteCount: number, totalStaff: number, expectedToday: number }
-     * #dashboard-onsite-list     data-component="OnsiteStaffList"
-     *     expects: [{ id: number, name: string, role: string, clockedInAt: string }]
-     * #dashboard-recent-activity data-component="RecentActivityList"
-     *     expects: [{ id: number, staffName: string, type: string, timestamp: string }]
-     *
-     * Loading/error markup below are temporary S2-13 stand-ins.
-     * After a successful clock-in/out, dispatch:
-     *     window.dispatchEvent(new CustomEvent('attendance:clock-updated'))
-     * or call window.Dashboard.refresh().
-     */
-    ?>
-    <main class="dashboard" id="dashboard" aria-busy="true">
-        <header class="dashboard__header">
-            <h1>Attendance dashboard</h1>
-            <p class="dashboard__updated" id="dashboard-updated">Loading&hellip;</p>
-        </header>
+    <div class="app">
+        <aside class="sidebar">
+            <div class="sidebar__logo">LC Attends</div>
+            <nav class="sidebar__nav">
+                <a href="index.php" class="sidebar__link sidebar__link--active">Dashboard</a>
+                <a href="#" class="sidebar__link">Attendance log</a>
+            </nav>
+            <a href="#" class="sidebar__logout">Logout</a>
+        </aside>
 
-        <!-- TODO(S2-13): replace with the shared loading component when it lands. -->
-        <div id="dashboard-loading" class="dashboard__state dashboard__state--loading" role="status" aria-live="polite">
-            Loading dashboard data&hellip;
+        <div class="main">
+            <header class="topbar">
+                <span id="today-date"></span>
+                <span id="last-updated"></span>
+                <span id="user-chip"></span>
+            </header>
+
+            <main class="dashboard" id="dashboard" aria-busy="true">
+                <section id="greeting"></section>
+
+                <!--
+                  S2-13 shared loading/error contract. The shared script has not
+                  landed in this repository yet; the inline implementation in
+                  the script below provides the same data-component hooks.
+                -->
+                <div id="dashboard-loading" data-component="LoadingState" role="status" aria-live="polite">
+                    <p id="dashboard-loading-message">Loading attendance data&hellip;</p>
+                </div>
+                <div id="dashboard-error" data-component="ErrorState" role="alert" hidden>
+                    <p id="dashboard-error-message">Something went wrong.</p>
+                    <button type="button" id="dashboard-retry" data-feedback-action="retry">Try again</button>
+                </div>
+
+                <div id="dashboard-content" hidden>
+                    <div class="row row--status">
+                        <section id="status-badge"></section>
+                        <section id="clocked-out"></section>
+                    </div>
+
+                    <section id="hours-summary"></section>
+
+                    <div class="row row--history">
+                        <section id="recent-records"></section>
+                    </div>
+                </div>
+            </main>
         </div>
-
-        <!-- TODO(S2-13): replace with the shared error component when it lands. -->
-        <div id="dashboard-error" class="dashboard__state dashboard__state--error" role="alert" hidden>
-            <p id="dashboard-error-message">Something went wrong.</p>
-            <button type="button" id="dashboard-retry">Try again</button>
-        </div>
-
-        <div id="dashboard-content" hidden>
-            <section id="dashboard-summary" class="dashboard__summary" aria-label="Attendance summary"
-                     data-component="SummaryCards"
-                     data-expects="onsiteCount:number, totalStaff:number, expectedToday:number"></section>
-
-            <div class="dashboard__panels">
-                <section id="dashboard-onsite-list" class="dashboard__list dashboard__panel" aria-label="Staff currently onsite"
-                         data-component="OnsiteStaffList"
-                         data-expects="[{id:number, name:string, role:string, clockedInAt:string}]"></section>
-
-                <section id="dashboard-recent-activity" class="dashboard__list dashboard__panel" aria-label="Recent attendance activity"
-                         data-component="RecentActivityList"
-                         data-expects="[{id:number, staffName:string, type:string, timestamp:string}]"></section>
-            </div>
-        </div>
-    </main>
+    </div>
 
     <script>
         (function () {
             'use strict';
 
-            var ENDPOINT = '/api/dashboard';
-            var REFRESH_EVENT = 'attendance:clock-updated';
+            var PREVIEW = <?php echo isset($_GET['preview']) ? 'true' : 'false'; ?>;
+            var ENDPOINT = 'index.php?api=dashboard' + (PREVIEW ? '&preview=1' : '');
             var DEBUG = <?php echo json_encode(APP_DEBUG); ?>;
+            var STAFF_ID = <?php echo json_encode($_SESSION['staff_id'] ?? null); ?>;
+            var TIMEOUT_MS = 10000;
+            var REFRESH_EVENTS = [
+                'attendance:clock-updated',
+                'attendance:clock-success',
+                'attendance:clocked-in',
+                'attendance:clocked-out'
+            ];
 
             var dashboard = document.getElementById('dashboard');
-            var updatedEl = document.getElementById('dashboard-updated');
+            var contentEl = document.getElementById('dashboard-content');
+            var todayEl = document.getElementById('today-date');
+            var lastUpdatedEl = document.getElementById('last-updated');
+            var userEl = document.getElementById('user-chip');
+            var greetingEl = document.getElementById('greeting');
+
+            var lastData = null;
+            var activeController = null;
+            var refreshTimer = null;
+            var retryHandler = null;
+
+            /* ---------- S2-13 shared loading/error component (inline shim) ---------- */
+
             var loadingEl = document.getElementById('dashboard-loading');
+            var loadingMessageEl = document.getElementById('dashboard-loading-message');
             var errorEl = document.getElementById('dashboard-error');
             var errorMessageEl = document.getElementById('dashboard-error-message');
             var retryBtn = document.getElementById('dashboard-retry');
-            var contentEl = document.getElementById('dashboard-content');
-            var summaryEl = document.getElementById('dashboard-summary');
-            var onsiteEl = document.getElementById('dashboard-onsite-list');
-            var activityEl = document.getElementById('dashboard-recent-activity');
 
-            var lastData = null;
-
-            /*
-             * DRAFT JSON - section 7 placeholder.
-             * Used only while GET /api/dashboard is not implemented yet (404/501).
-             * Replace this function with the real agreed sample when it is available.
-             */
-            function draftDashboardData() {
-                return {
-                    generatedAt: new Date().toISOString(),
-                    summary: {
-                        onsiteCount: 2,
-                        totalStaff: 12,
-                        expectedToday: 10
+            if (!window.SharedFeedback || typeof window.SharedFeedback.showLoading !== 'function') {
+                window.SharedFeedback = {
+                    onRetry: function (handler) {
+                        retryHandler = handler;
                     },
-                    onsiteStaff: [
-                        { id: 101, name: 'Jane Doe', role: 'Staff', clockedInAt: '2026-11-25T08:01:00+02:00' },
-                        { id: 102, name: 'John Smith', role: 'Staff', clockedInAt: '2026-11-25T08:15:00+02:00' }
-                    ],
-                    recentActivity: [
-                        { id: 9001, staffId: 101, staffName: 'Jane Doe', type: 'clock-in', timestamp: '2026-11-25T08:01:00+02:00' },
-                        { id: 9002, staffId: 102, staffName: 'John Smith', type: 'clock-in', timestamp: '2026-11-25T08:15:00+02:00' }
-                    ]
-                };
-            }
-
-            function firstDefined() {
-                for (var i = 0; i < arguments.length; i += 1) {
-                    if (arguments[i] !== undefined && arguments[i] !== null) {
-                        return arguments[i];
+                    showLoading: function (message) {
+                        loadingEl.hidden = false;
+                        errorEl.hidden = true;
+                        if (message) {
+                            loadingMessageEl.textContent = message;
+                        }
+                    },
+                    showError: function (message) {
+                        loadingEl.hidden = true;
+                        errorEl.hidden = false;
+                        errorMessageEl.textContent = message || 'Something went wrong.';
+                    },
+                    hide: function () {
+                        loadingEl.hidden = true;
+                        errorEl.hidden = true;
                     }
-                }
-                return undefined;
-            }
-
-            function normalise(raw) {
-                var data = raw && typeof raw === 'object' ? raw : {};
-                var summary = data.summary || data.stats || {};
-                var onsite = firstDefined(data.onsiteStaff, data.staffOnSite, data.staff, []);
-                var activity = firstDefined(data.recentActivity, data.activity, data.activities, []);
-
-                return {
-                    generatedAt: firstDefined(data.generatedAt, data.updatedAt, data.lastUpdated, null),
-                    summary: {
-                        onsiteCount: Number(firstDefined(summary.onsiteCount, summary.onSiteCount, summary.currentOnsite, 0)),
-                        totalStaff: Number(firstDefined(summary.totalStaff, summary.staffTotal, 0)),
-                        expectedToday: Number(firstDefined(summary.expectedToday, summary.expected, 0))
-                    },
-                    onsiteStaff: Array.isArray(onsite) ? onsite : [],
-                    recentActivity: Array.isArray(activity) ? activity : []
                 };
             }
 
-            function clear(element) {
-                while (element.firstChild) {
-                    element.removeChild(element.firstChild);
+            var feedback = window.SharedFeedback;
+
+            if (retryBtn) {
+                retryBtn.addEventListener('click', function () {
+                    if (typeof retryHandler === 'function') {
+                        retryHandler();
+                    }
+                });
+            }
+            feedback.onRetry(function () { loadDashboard(); });
+
+            /* ---------- Data normalising and rendering ---------- */
+
+            function escapeHtml(value) {
+                return String(value === null || value === undefined ? '' : value)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            function parseApiDate(value) {
+                if (!value) {
+                    return null;
                 }
+                var date = new Date(String(value).replace(' ', 'T'));
+                return isNaN(date.getTime()) ? null : date;
+            }
+
+            function formatDate(value) {
+                var date = parseApiDate(value);
+                return date
+                    ? date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                    : '';
             }
 
             function formatTime(value) {
-                var date = new Date(value);
-                return isNaN(date.getTime()) ? String(value) : date.toLocaleTimeString();
+                var date = parseApiDate(value);
+                return date
+                    ? date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                    : '--:--';
             }
 
-            function appendHeading(target, text) {
-                var heading = document.createElement('h2');
-                heading.textContent = text;
-                target.appendChild(heading);
+            function formatDateTime(value) {
+                var date = parseApiDate(value);
+                return date
+                    ? formatDate(value) + ', ' + formatTime(value)
+                    : '';
             }
 
-            function appendEmpty(target, text) {
-                var paragraph = document.createElement('p');
-                paragraph.textContent = text;
-                target.appendChild(paragraph);
-            }
-
-            function initials(name) {
-                return String(name)
-                    .split(/\s+/)
-                    .filter(function (part) { return part.length > 0; })
-                    .slice(0, 2)
-                    .map(function (part) { return part.charAt(0); })
-                    .join('')
-                    .toUpperCase();
-            }
-
-            function badgeClass(status) {
-                var value = String(status).toLowerCase();
-                if (value.indexOf('absent') !== -1) {
-                    return 'dashboard__badge dashboard__badge--absent';
+            function firstClock(records, field) {
+                for (var i = 0; i < records.length; i += 1) {
+                    if (records[i] && records[i][field]) {
+                        return records[i][field];
+                    }
                 }
-                if (value.indexOf('away') !== -1) {
-                    return 'dashboard__badge dashboard__badge--away';
-                }
-                if (value.indexOf('late') !== -1) {
-                    return 'dashboard__badge dashboard__badge--late';
-                }
-                return 'dashboard__badge';
+                return null;
             }
 
-            function renderSummary(target, summary) {
-                clear(target);
-                appendHeading(target, 'Attendance summary');
+            // Maps GET /api/dashboard JSON to the values the page renders.
+            function normalise(raw) {
+                var data = raw && typeof raw === 'object' ? raw : {};
+                var hours = data.hours || {};
+                var records = Array.isArray(data.recent_records)
+                    ? data.recent_records
+                    : (Array.isArray(data.recentActivity) ? data.recentActivity : []);
+                var status = String(data.status || '').toUpperCase() === 'IN' ? 'IN' : 'OUT';
 
-                var items = [
-                    ['Onsite now', summary.onsiteCount, 'People in the building'],
-                    ['Total staff', summary.totalStaff, 'Staff records'],
-                    ['Expected today', summary.expectedToday, 'Expected today']
-                ];
-
-                items.forEach(function (item) {
-                    var card = document.createElement('article');
-                    card.className = 'dashboard__card';
-
-                    var label = document.createElement('h3');
-                    label.textContent = item[0];
-
-                    var value = document.createElement('p');
-                    value.className = 'dashboard__card-value';
-                    value.textContent = String(item[1]);
-
-                    var note = document.createElement('p');
-                    note.className = 'dashboard__card-note';
-                    note.textContent = item[2];
-
-                    card.appendChild(label);
-                    card.appendChild(value);
-                    card.appendChild(note);
-                    target.appendChild(card);
-                });
+                return {
+                    status: status,
+                    hours: {
+                        today: Number(hours.today) || 0,
+                        week: Number(hours.week) || 0
+                    },
+                    records: records.slice(0, 10),
+                    clockInAt: firstClock(records, 'clock_in'),
+                    clockOutAt: firstClock(records, 'clock_out'),
+                    generatedAt: data.generated_at || data.generatedAt || null
+                };
             }
 
-            function renderOnsite(target, staff) {
-                clear(target);
-                appendHeading(target, 'Currently onsite');
+            function renderStatus(data) {
+                var el = document.getElementById('status-badge');
+                var isIn = data.status === 'IN';
 
-                if (!staff.length) {
-                    appendEmpty(target, 'No staff are currently onsite.');
+                el.className = 'status-card ' + (isIn ? 'status-card--in' : 'status-card--out');
+                el.innerHTML =
+                    '<div class="status-card__icon">' + (isIn ? '&#10003;' : '&#8212;') + '</div>' +
+                    '<div class="status-card__main">' +
+                        '<span class="status-card__label">Current Status</span>' +
+                        '<span class="status-card__value">' + (isIn ? 'IN' : 'OUT') + '</span>' +
+                        '<span class="status-card__pill">' + (isIn ? 'Clocked In' : 'Clocked Out') + '</span>' +
+                    '</div>' +
+                    '<div class="status-card__time">' +
+                        '<span class="status-card__label">Clocked In At</span>' +
+                        '<span class="status-card__value status-card__value--time">' +
+                            escapeHtml(data.clockInAt ? formatTime(data.clockInAt) : '--:--') +
+                        '</span>' +
+                        '<span class="status-card__date">' +
+                            escapeHtml(data.clockInAt ? formatDate(data.clockInAt) : '') +
+                        '</span>' +
+                    '</div>';
+            }
+
+            function renderClockedOut(data) {
+                var el = document.getElementById('clocked-out');
+                var clockOut = data.status === 'OUT' ? data.clockOutAt : null;
+
+                el.className = 'clocked-out-card';
+                el.innerHTML =
+                    '<span class="clocked-out-card__label">Clocked Out</span>' +
+                    '<span class="clocked-out-card__time">' + escapeHtml(clockOut ? formatTime(clockOut) : '--:--') + '</span>' +
+                    '<span class="clocked-out-card__note">' + (clockOut ? 'Shift ended' : 'Not yet clocked out') + '</span>' +
+                    '<span class="clocked-out-card__updated">' +
+                        'Last updated ' + escapeHtml(data.generatedAt ? formatDateTime(data.generatedAt) : 'just now') +
+                    '</span>';
+            }
+
+            function renderHours(data) {
+                var el = document.getElementById('hours-summary');
+
+                el.innerHTML =
+                    '<div class="hours-card">' +
+                        '<span class="hours-card__label">Today</span>' +
+                        '<span class="hours-card__value">' + data.hours.today.toFixed(2) + ' h</span>' +
+                    '</div>' +
+                    '<div class="hours-card">' +
+                        '<span class="hours-card__label">This week</span>' +
+                        '<span class="hours-card__value">' + data.hours.week.toFixed(2) + ' h</span>' +
+                    '</div>';
+            }
+
+            function renderRecords(records) {
+                var el = document.getElementById('recent-records');
+
+                el.className = 'records-card';
+
+                if (!records.length) {
+                    el.innerHTML =
+                        '<h2 class="records-card__title">Attendance History</h2>' +
+                        '<p class="records-card__empty">No records yet.</p>';
                     return;
                 }
 
-                var list = document.createElement('ul');
-                staff.forEach(function (person) {
-                    var item = document.createElement('li');
-                    item.className = 'dashboard__row';
+                var rows = records.map(function (record) {
+                    var clockOut = record.clock_out ? formatTime(record.clock_out) : 'Still in';
+                    var hours = (record.hours === null || record.hours === undefined)
+                        ? '--'
+                        : Number(record.hours).toFixed(2) + ' h';
+                    var tag = record.is_corrected ? '<span class="record__tag">Corrected</span>' : '';
 
-                    var name = firstDefined(person.name, person.staffName, person.fullName, 'Unknown staff');
-                    var role = firstDefined(person.role, person.department, '');
-                    var clockedIn = firstDefined(person.clockedInAt, person.clockInTime, person.clockedIn, '');
-                    var status = firstDefined(person.status, 'Present');
+                    return '<li class="record ' + (record.is_corrected ? 'record--corrected' : '') + '">' +
+                        '<div class="record__date">' + escapeHtml(formatDate(record.clock_in)) + ' ' + tag + '</div>' +
+                        '<div class="record__times">' +
+                            '<span>In: ' + escapeHtml(formatTime(record.clock_in)) + '</span>' +
+                            '<span>Out: ' + escapeHtml(clockOut) + '</span>' +
+                            '<span>' + escapeHtml(hours) + '</span>' +
+                        '</div>' +
+                    '</li>';
+                }).join('');
 
-                    var avatar = document.createElement('span');
-                    avatar.className = 'dashboard__avatar';
-                    avatar.textContent = initials(name);
-
-                    var info = document.createElement('span');
-                    info.className = 'dashboard__row-info';
-
-                    var nameEl = document.createElement('strong');
-                    nameEl.textContent = name;
-
-                    var meta = document.createElement('span');
-                    meta.className = 'dashboard__row-meta';
-                    meta.textContent = role + (clockedIn ? ' · In ' + formatTime(clockedIn) : '');
-
-                    var badge = document.createElement('span');
-                    badge.className = badgeClass(status);
-                    badge.textContent = status;
-
-                    info.appendChild(nameEl);
-                    info.appendChild(meta);
-                    item.appendChild(avatar);
-                    item.appendChild(info);
-                    item.appendChild(badge);
-                    list.appendChild(item);
-                });
-                target.appendChild(list);
-            }
-
-            function renderActivity(target, activity) {
-                clear(target);
-                appendHeading(target, 'Recent activity');
-
-                if (!activity.length) {
-                    appendEmpty(target, 'No recent attendance activity.');
-                    return;
-                }
-
-                var list = document.createElement('ul');
-                activity.forEach(function (entry) {
-                    var item = document.createElement('li');
-                    item.className = 'dashboard__activity-item';
-
-                    var name = firstDefined(entry.staffName, entry.name, 'Unknown staff');
-                    var type = firstDefined(entry.type, entry.action, 'attendance');
-                    var time = firstDefined(entry.timestamp, entry.at, '');
-
-                    var marker = document.createElement('span');
-                    marker.className = 'dashboard__activity-marker';
-
-                    var body = document.createElement('span');
-                    body.className = 'dashboard__activity-body';
-
-                    var nameEl = document.createElement('strong');
-                    nameEl.textContent = name;
-
-                    var detail = document.createElement('span');
-                    detail.className = 'dashboard__activity-detail';
-                    detail.textContent = type;
-
-                    var timeEl = document.createElement('span');
-                    timeEl.className = 'dashboard__activity-time';
-                    timeEl.textContent = time ? formatTime(time) : '';
-
-                    body.appendChild(nameEl);
-                    body.appendChild(detail);
-                    item.appendChild(marker);
-                    item.appendChild(body);
-                    item.appendChild(timeEl);
-                    list.appendChild(item);
-                });
-                target.appendChild(list);
+                el.innerHTML =
+                    '<h2 class="records-card__title">Attendance History</h2>' +
+                    '<ul class="records-list">' + rows + '</ul>';
             }
 
             function render(data) {
-                renderSummary(summaryEl, data.summary);
-                renderOnsite(onsiteEl, data.onsiteStaff);
-                renderActivity(activityEl, data.recentActivity);
-                updatedEl.textContent = data.generatedAt
-                    ? 'Last updated ' + formatTime(data.generatedAt)
-                    : 'Last updated just now';
+                todayEl.textContent = new Date().toLocaleDateString('en-US', {
+                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+                });
+                userEl.textContent = STAFF_ID ? 'Staff #' + STAFF_ID : 'Staff';
+                greetingEl.textContent = 'Dashboard';
+                lastUpdatedEl.textContent = data.generatedAt
+                    ? 'Last updated ' + formatDateTime(data.generatedAt)
+                    : '';
+
+                renderStatus(data);
+                renderClockedOut(data);
+                renderHours(data);
+                renderRecords(data.records);
             }
 
-            function setState(state) {
-                loadingEl.hidden = state !== 'loading';
-                errorEl.hidden = state !== 'error';
-                contentEl.hidden = state === 'loading' || state === 'error';
+            function setState(state, message) {
                 dashboard.setAttribute('aria-busy', state === 'loading' ? 'true' : 'false');
+
+                if (state === 'loading') {
+                    feedback.showLoading(message);
+                } else if (state === 'error') {
+                    feedback.showError(message);
+                } else {
+                    feedback.hide();
+                }
             }
 
-            function showError(message) {
-                errorMessageEl.textContent = message;
-                setState('error');
-            }
+            /* ---------- GET /api/dashboard via fetch/AJAX ---------- */
 
             function loadDashboard() {
-                setState('loading');
+                if (activeController) {
+                    activeController.abort(); // a newer refresh replaces this request
+                }
+
+                var controller = new AbortController();
+                var timedOut = false;
+                activeController = controller;
+
+                var timer = window.setTimeout(function () {
+                    timedOut = true;
+                    controller.abort();
+                }, TIMEOUT_MS);
+
+                contentEl.hidden = true;
+                setState('loading', 'Loading attendance data…');
 
                 return fetch(ENDPOINT, {
+                    method: 'GET',
                     headers: { 'Accept': 'application/json' },
                     credentials: 'same-origin',
-                    cache: 'no-store'
+                    cache: 'no-store',
+                    signal: controller.signal
                 })
                     .then(function (response) {
-                        var contentType = response.headers.get('Content-Type') || '';
-
-                        if (response.ok && contentType.indexOf('application/json') !== -1) {
-                            return response.json();
+                        if (!response.ok) {
+                            return response.json().catch(function () { return null; }).then(function (body) {
+                                throw new Error(body && body.error ? body.error : 'HTTP ' + response.status);
+                            });
                         }
-                        // Endpoint not built yet - develop against the draft JSON above.
-                        // Also covers a dev-server fallback that returns HTML instead of JSON.
-                        if (response.status === 404 || response.status === 501 ||
-                            contentType.indexOf('application/json') === -1) {
-                            return draftDashboardData();
-                        }
-                        throw new Error('HTTP ' + response.status);
+                        return response.json();
                     })
-                    .then(function (raw) {
-                        lastData = normalise(raw);
+                    .then(function (json) {
+                        if (!json || typeof json !== 'object') {
+                            throw new Error('Invalid dashboard response');
+                        }
+                        if (json.error) {
+                            throw new Error(json.error);
+                        }
+
+                        lastData = normalise(json);
                         render(lastData);
+                        contentEl.hidden = false;
                         setState('ready');
                         return lastData;
                     })
                     .catch(function (error) {
-                        showError(DEBUG
-                            ? 'Could not load dashboard: ' + error.message
+                        if (controller.signal.aborted && !timedOut) {
+                            return null; // superseded by a newer refresh
+                        }
+
+                        var message = timedOut
+                            ? 'The request timed out. Please try again.'
+                            : (error && error.message ? error.message : 'Could not load dashboard data.');
+
+                        setState('error', DEBUG
+                            ? message
                             : 'Could not load dashboard data. Please try again.');
                         return null;
+                    })
+                    .then(function (result) {
+                        window.clearTimeout(timer);
+                        if (activeController === controller) {
+                            activeController = null;
+                        }
+                        return result;
                     });
             }
 
-            retryBtn.addEventListener('click', loadDashboard);
+            /* ---------- Post-clock refresh ---------- */
 
-            // Post-clock refresh contract: Phelisa's clock code dispatches this event
-            // (or calls window.Dashboard.refresh()) after a successful clock-in/out.
-            window.addEventListener(REFRESH_EVENT, loadDashboard);
+            function scheduleRefresh() {
+                window.clearTimeout(refreshTimer);
+                refreshTimer = window.setTimeout(loadDashboard, 150);
+            }
+
+            REFRESH_EVENTS.forEach(function (eventName) {
+                window.addEventListener(eventName, scheduleRefresh);
+            });
+
             window.addEventListener('storage', function (event) {
-                if (event.key === REFRESH_EVENT || event.key === 'attendance:refresh-dashboard') {
-                    loadDashboard();
+                if (event.key && REFRESH_EVENTS.indexOf(event.key) !== -1) {
+                    scheduleRefresh();
                 }
             });
 
-            // Fallback for clock controls that use data-clock-action before the event is wired.
+            // Clock controls that do not dispatch an event yet.
             document.addEventListener('click', function (event) {
-                if (event.target && event.target.closest && event.target.closest('[data-clock-action]')) {
-                    window.setTimeout(loadDashboard, 500);
+                if (event.target && event.target.closest &&
+                    event.target.closest('[data-clock-action]')) {
+                    scheduleRefresh();
                 }
             });
 
             window.Dashboard = {
                 refresh: loadDashboard,
-                eventName: REFRESH_EVENT,
-                get data() {
-                    return lastData;
-                }
+                eventNames: REFRESH_EVENTS,
+                get data() { return lastData; }
             };
 
             loadDashboard();
