@@ -170,10 +170,34 @@ function renderGreeting(fullName, today) {
   `;
 }
 
+// This Week summary: days present out of working days, plus an attendance rate ring.
+// Inputs: daysPresent (number, e.g. 5), workingDays (number, e.g. 5)
+// Writes into: <section id="week-summary">
+function renderWeekSummary(daysPresent, workingDays) {
+  const el = document.getElementById("week-summary");
+  const rate = workingDays > 0 ? Math.round((daysPresent / workingDays) * 100) : 0;
+
+  el.className = "week-card";
+  el.innerHTML = `
+    <h2 class="week-card__title">This Week</h2>
+    <div class="week-card__body">
+      <div class="week-card__days">
+        <span class="week-card__big">${daysPresent}/${workingDays}</span>
+        <span class="week-card__label">days present</span>
+      </div>
+      <div class="week-card__ring" style="--rate: ${rate}">
+        <span class="week-card__rate">${rate}%</span>
+      </div>
+    </div>
+    <p class="week-card__note">Attendance rate</p>
+  `;
+}
+
 // Dummy data for now. Imaan will replace these two lines with a call
 // that passes in the real values from GET /api/dashboard.
 renderStatusBadge("IN", "09:15 AM", "Today, 24 Mar 2025");
 renderHoursSummary({ today: 4.5, week: 22.25 });
+renderWeekSummary(5, 5);
 renderClockedOut(null, "24 Mar 2025, 09:15 AM");
 
 renderRecentRecords([
@@ -183,3 +207,4 @@ renderRecentRecords([
 ]);
 
 renderGreeting("Phelisa Fani", new Date());
+renderWeekSummary(5, 5);

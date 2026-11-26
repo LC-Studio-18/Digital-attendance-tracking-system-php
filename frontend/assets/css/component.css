@@ -310,3 +310,72 @@
     display: none;
   }
 }
+
+/* This Week summary card */
+.week-card {
+  background: var(--color-card);
+  border-radius: var(--radius-card);
+  padding: 20px 24px;
+  border: 1px solid #e3e9ec;
+  margin-top: 24px;
+}
+
+.week-card__title {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+  color: var(--color-navy);
+}
+
+.week-card__body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.week-card__days {
+  display: flex;
+  flex-direction: column;
+}
+
+.week-card__big {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.week-card__label {
+  color: var(--color-muted);
+}
+
+/* The ring: --rate (0 to 100) is set by the JavaScript */
+.week-card__ring {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: conic-gradient(var(--color-teal) calc(var(--rate) * 1%), #e3e9ec 0);
+  display: grid;
+  place-items: center;
+}
+
+/* White circle in the middle to make it a ring */
+.week-card__ring::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  background: var(--color-card);
+}
+
+.week-card__rate {
+  position: relative;
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.week-card__note {
+  margin: 12px 0 0;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
