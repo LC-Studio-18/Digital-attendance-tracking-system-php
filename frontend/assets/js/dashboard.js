@@ -302,7 +302,7 @@ function renderAttendanceChart(days) {
   const width = 600;
   const height = 230;
   const left = 40;
-  const right = 24;
+  const right = 40;
   const top = 12;
   const bottom = 30;
   const plotW = width - left - right;

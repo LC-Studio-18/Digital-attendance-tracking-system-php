@@ -817,3 +817,14 @@
   flex-shrink: 0;
   white-space: nowrap;
 }
+
+/* Small phones: the drawing shrinks, so its text needs to be bigger to stay readable */
+@media (max-width: 480px) {
+  .chart__axis {
+    font-size: 16px;
+  }
+
+  .chart__dot {
+    r: 5;
+  }
+}
