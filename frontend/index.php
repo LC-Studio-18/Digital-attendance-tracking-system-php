@@ -48,12 +48,12 @@ if ($isLoginApi) {
         $body = $_POST;
     }
 
-    $username = trim((string) ($body['username'] ?? ''));
-    $password = (string) ($body['password'] ?? '');
+    $username = trim((string) ($body['username'] ?? $body['email'] ?? ''));
+    $password = (string) ($body['password'] ?? $body['pass'] ?? '');
     $staff = null;
+    $credentialsFile = __DIR__ . '/../config/credentials.php';
 
     // Use the real database once config/credentials.php has been set up.
-    $credentialsFile = __DIR__ . '/../config/credentials.php';
     if (is_file($credentialsFile) && $username !== '' && $password !== '') {
         require_once __DIR__ . '/../backend/config/database.php';
 
@@ -85,14 +85,23 @@ if ($isLoginApi) {
     if ($staff === null && $username !== '' && $password !== '') {
         $hash = '$2y$10$tl2J5rrrUe7I3PnTxpjXB.O7FWV6XmY1F5NICRtSsUS/8KqDBP/v.';
         $seededAccounts = [
-            ['id' => 1, 'email' => 'staff1@example.com', 'number' => 'EMP001', 'name' => 'Test Staff', 'role' => 'staff'],
-            ['id' => 2, 'email' => 'staff2@example.com', 'number' => 'EMP002', 'name' => 'Other Staff', 'role' => 'staff'],
-            ['id' => 3, 'email' => 'manager@example.com', 'number' => 'EMP900', 'name' => 'Test Manager', 'role' => 'manager']
+            ['id' => 1, 'email' => 'staff1@example.com', 'number' => 'EMP001', 'name' => 'Test Staff', 'role' => 'staff', 'aliases' => ['staff1', 'test staff']],
+            ['id' => 2, 'email' => 'staff2@example.com', 'number' => 'EMP002', 'name' => 'Other Staff', 'role' => 'staff', 'aliases' => ['staff2', 'other staff']],
+            ['id' => 3, 'email' => 'manager@example.com', 'number' => 'EMP900', 'name' => 'Test Manager', 'role' => 'manager', 'aliases' => ['manager', 'test manager']]
         ];
 
         foreach ($seededAccounts as $account) {
-            $matches = strcasecmp($username, $account['email']) === 0
-                || strcasecmp($username, $account['number']) === 0;
+            $identities = array_merge(
+                [$account['email'], $account['number'], strstr($account['email'], '@', true), (string) $account['id']],
+                $account['aliases']
+            );
+            $matches = false;
+            foreach ($identities as $identity) {
+                if (strcasecmp($username, (string) $identity) === 0) {
+                    $matches = true;
+                    break;
+                }
+            }
 
             if ($matches && password_verify($password, $hash)) {
                 $staff = [
@@ -107,7 +116,11 @@ if ($isLoginApi) {
 
     if ($staff === null) {
         http_response_code(401);
-        echo json_encode(['success' => false, 'message' => 'Invalid username or password.']);
+        $message = 'Invalid username or password.';
+        if (!is_file($credentialsFile)) {
+            $message .= ' Demo login: staff1@example.com (or staff1 / EMP001) with Password123!';
+        }
+        echo json_encode(['success' => false, 'message' => $message]);
         exit;
     }
 
