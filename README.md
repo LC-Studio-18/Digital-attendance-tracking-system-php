@@ -25,16 +25,23 @@ Digital-attendance-tracking-system-php/
 ├── backend/
 │   ├── config/
 │   ├── includes/
-│   ├── controllers/
-│   ├── models/
-│   └── views/
+│   ├── controllers/      (planned)
+│   ├── models/           (planned)
+│   └── views/            (planned)
 ├── frontend/
 │   ├── assets/
 │   │   ├── css/
 │   │   └── js/
 │   └── index.php
+├── database/
+│   ├── schema.sql
+│   ├── seed.sql
+│   └── create_app_user.sql
+├── tests/
+│   ├── test_connection.php
+│   └── test_idempotency.php
 ├── config/
-├── storage/
+├── storage/              (planned)
 │   └── logs/
 ├── .env.example
 ├── .gitignore
@@ -54,8 +61,10 @@ Digital-attendance-tracking-system-php/
 | `frontend/` | Contains files served to the browser |
 | `frontend/assets/css/` | Contains CSS stylesheets |
 | `frontend/assets/js/` | Contains browser JavaScript files |
+| `database/` | Contains the MySQL schema, development seed data and app-user setup SQL |
+| `tests/` | Contains CLI verification scripts |
 | `config/` | Contains protected server-specific configuration and credentials |
-| `storage/logs/` | Contains application logs |
+| `storage/logs/` | Will contain application logs |
 | `.env.example` | Shows the environment variables required to run the project locally |
 | `.gitignore` | Prevents sensitive files and unnecessary files from being committed |
 
@@ -68,6 +77,122 @@ Digital-attendance-tracking-system-php/
 - Backend configuration, credentials, controllers, models, and logs must not be placed inside `frontend/`.
 - PDO prepared statements must be used for database queries that include user input.
 - Detailed errors should be logged, while users should receive generic error messages.
+
+## Request tokens and idempotency (S2-13B)
+
+Attendance writes can include a `request_token`. `database/schema.sql` defines this as `VARCHAR(64) NULL` with a unique constraint, so a token can be used for only one attendance row. Generate a fresh token for each intended attendance action, and resend the same token when retrying a request after a timeout or network failure.
+
+### Implemented backend pieces
+
+- `backend/includes/IdempotencyService.php` checks tokens, reuses original records and handles concurrent duplicate inserts using the database constraint.
+- `backend/includes/error-handler.php` provides reusable JSON response helpers: `sendJsonResponse()`, `sendJsonSuccess()`, `sendJsonError()` and `sendIdempotencyResponse()`.
+- S2-13B does **not** add an attendance HTTP endpoint. Controllers can pass an `IdempotencyService` result to `sendIdempotencyResponse()` when an endpoint is implemented.
+
+A token must be non-empty after trimming and no longer than 64 characters. Invalid tokens, tokens owned by another staff member and database failures are rejected without creating an attendance row.
+
+### JSON response format (proposed, pending frontend confirmation)
+
+The S2-13B backend helpers emit the shape below. The cross-team frontend agreement is being handled separately; no approval is recorded in this repository, so treat this as a **proposed** contract until the frontend team confirms it.
+
+Every response from the helpers uses the same three fields:
+
+- `status` — `success` or `error`
+- `message` — a short, frontend-safe explanation
+- `code` — a stable machine-readable code
+
+A successful result may also include `data.record`. Responses are sent with `Content-Type: application/json; charset=utf-8` and an appropriate HTTP status code.
+
+Successful creation example:
+
+```http
+HTTP/1.1 201 Created
+Content-Type: application/json; charset=utf-8
+
+{
+  "status": "success",
+  "message": "Attendance recorded successfully.",
+  "code": "ATTENDANCE_RECORDED",
+  "data": {
+    "record": {
+      "record_id": 12,
+      "staff_id": 1,
+      "request_token": "S2-13B-NEW-A1B2C3D4E5F6",
+      "clock_in": "2026-11-26 08:00:00",
+      "clock_out": null,
+      "created_at": "2026-11-26 08:00:00",
+      "updated_at": "2026-11-26 08:00:00"
+    }
+  }
+}
+```
+
+A retry with the same token and staff member returns the original record instead of inserting another row:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+
+{
+  "status": "success",
+  "message": "Attendance already recorded for this request.",
+  "code": "CLOCK_ALREADY_RECORDED",
+  "data": {
+    "record": {
+      "record_id": 12,
+      "staff_id": 1,
+      "request_token": "S2-13B-NEW-A1B2C3D4E5F6",
+      "clock_in": "2026-11-26 08:00:00",
+      "clock_out": null,
+      "created_at": "2026-11-26 08:00:00",
+      "updated_at": "2026-11-26 08:00:00"
+    }
+  }
+}
+```
+
+### Error responses
+
+| HTTP status | `code` | `message` |
+|---|---|---|
+| `400 Bad Request` | `INVALID_REQUEST_TOKEN` | A valid request token is required. |
+| `403 Forbidden` | `TOKEN_USER_MISMATCH` | This request token cannot be used for your account. |
+| `500 Internal Server Error` | `REQUEST_FAILED` | Unable to process your request right now. Please try again. |
+| `500 Internal Server Error` | `INTERNAL_SERVER_ERROR` | An unexpected error occurred. Please try again later. |
+
+Example:
+
+```http
+HTTP/1.1 403 Forbidden
+Content-Type: application/json; charset=utf-8
+
+{
+  "status": "error",
+  "message": "This request token cannot be used for your account.",
+  "code": "TOKEN_USER_MISMATCH"
+}
+```
+
+API responses never include technical details such as exception messages, SQL errors, stack traces or credentials. Uncaught exceptions are written to the PHP error log; `APP_DEBUG=true` only adds trace detail to that internal log entry, never to the response.
+
+### How retries and cross-user reuse are handled
+
+- **Same staff, same token:** `IdempotencyService` finds the existing row and returns it with `CLOCK_ALREADY_RECORDED`. `sendIdempotencyResponse()` sends HTTP `200`, so a retry is safe.
+- **Simultaneous retries:** the unique database constraint allows only one insert. A duplicate-key collision is converted into the same replay result.
+- **Different staff, same token:** the stored `staff_id` is compared with the requesting staff member. A mismatch returns `TOKEN_USER_MISMATCH` with HTTP `403`; no new row is created.
+- **Invalid or missing token:** blank, whitespace-only and over-long tokens return `INVALID_REQUEST_TOKEN` with HTTP `400`.
+
+### Running the S2-13B test script
+
+Run from the project root after applying the tables from `database/schema.sql` and configuring `config/credentials.php`. `tests/test_idempotency.php` creates two temporary staff accounts and needs `DELETE` permission on the database it connects to so it can remove only its own test data.
+
+Prefer a disposable test database with a dedicated test-only account that has `SELECT`, `INSERT`, `UPDATE` and `DELETE` on that database only. Do **not** grant `DELETE` to the limited application user used by the running application. The script checks the token column, unique index and cleanup privilege before creating any data, then removes only the staff and attendance rows it created.
+
+```powershell
+C:\xampp\php\php.exe tests\test_connection.php
+C:\xampp\php\php.exe tests\test_idempotency.php
+```
+
+If PHP is on your `PATH`, `php tests\test_idempotency.php` is equivalent. The script prints `[PASS]`/`[FAIL]` for each check and exits non-zero if any check fails.
 
 ## Local setup
 
