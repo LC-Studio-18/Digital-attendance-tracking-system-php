@@ -28,7 +28,7 @@
 
 .site-header__logo {
   display: block;
-  width: 60px;
+  width: 101px;
   height: 60px;
   object-fit: contain;
 }
@@ -51,12 +51,37 @@
   }
 
   .site-header__logo {
-    width: 48px;
-    height: 48px;
+    width: 101px;
+    height: 60px;
   }
 
   .site-header__wordmark {
     width: 150px;
     height: auto;
+  }
+}
+
+/* Very narrow mobile screens */
+@media (max-width: 360px) {
+  .site-header__container {
+    padding: 0 12px;
+  }
+
+  .site-header__brand {
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .site-header__logo {
+    width: 76px;
+    height: 45px;
+    flex-shrink: 0;
+  }
+
+  .site-header__wordmark {
+    width: 120px;
+    max-width: 100%;
+    height: auto;
+    flex-shrink: 1;
   }
 }
