@@ -73,6 +73,8 @@
     // "stopped" event know whether to say "captured" or "camera stopped".
     let scanner = null;
     let hasCapturedCode = false;
+    // Guards against a second POST while the first one is still in flight.
+    let submitting = false;
 
     if (!status || !video || !placeholder || !cameraButton || !stopButton || !manualButton ||
         !fallback || !fallbackMessage || !form || !codeInput || !submitButton || !result) {
@@ -157,7 +159,9 @@
      */
     function extractQrToken(rawValue) {
         const trimmed = String(rawValue == null ? '' : rawValue).trim();
-        const match = trimmed.match(/[?&]qrToken=([^&#]+)/i);
+        // `*` (not `+`) so an empty qrToken= is caught by local validation
+        // instead of being submitted as the whole URL.
+        const match = trimmed.match(/[?&]qrToken=([^&#]*)/i);
 
         if (!match) {
             return trimmed;
@@ -177,11 +181,13 @@
     }
 
     /** Announces a confirmed clock-in so live status badges can refresh. */
-    function announceClockIn() {
+    function announceClockIn(clockInTime) {
         if (typeof window.CustomEvent !== 'function' || typeof window.dispatchEvent !== 'function') {
             return;
         }
-        window.dispatchEvent(new window.CustomEvent('attendance:clock-success'));
+        window.dispatchEvent(new window.CustomEvent('attendance:clock-success', {
+            detail: { action: 'clock-in', clockInTime: clockInTime }
+        }));
     }
 
     /** Handles a scanned QR value: stop the camera, fill the form, ask to confirm. */
@@ -322,10 +328,14 @@
         result.hidden = true;
     });
 
-    // Form submission: validate locally, disable the button while awaiting the
-    // network, and always re-enable it afterwards.
+    // Form submission: validate locally, ignore repeat submits while a request
+    // is in flight, and always re-enable the button afterwards.
     form.addEventListener('submit', async function (event) {
         event.preventDefault();
+
+        if (submitting) {
+            return;
+        }
 
         const qrToken = extractQrToken(codeInput.value);
         if (!qrToken) {
@@ -334,6 +344,7 @@
             return;
         }
 
+        submitting = true;
         submitButton.disabled = true;
         setResult('Checking in…', 'idle');
 
@@ -343,11 +354,12 @@
                 setResult('Code ready. Backend check-in will be connected in the next task.', 'idle');
             } else {
                 setResult(response.message, 'success');
-                announceClockIn();
+                announceClockIn(response.clockInTime);
             }
         } catch (error) {
             setResult(messageForError(error), 'error');
         } finally {
+            submitting = false;
             submitButton.disabled = false;
         }
     });

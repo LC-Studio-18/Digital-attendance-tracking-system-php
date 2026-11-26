@@ -23,9 +23,10 @@ From the project root:
 node --test tests/*.test.js
 ```
 
-Current result: 24 tests, all passing. They cover the QR-token POST shape, both
+Current result: 29 tests, all passing. They cover the QR-token POST shape, both
 supported response envelopes, QR-specific error codes, clock-in URL/query
-pre-fill, and the badge-refresh event, in addition to the camera behaviour. The
+pre-fill, duplicate submit protection, malformed/empty tokens, non-JSON replies,
+and the badge-refresh event detail, in addition to the camera behaviour. The
 tests use fake cameras and fake detector results, so they are deterministic and
 never ask for real permission.
 

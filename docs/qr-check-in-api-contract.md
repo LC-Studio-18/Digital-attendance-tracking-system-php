@@ -41,7 +41,9 @@ Notes:
   parameter before submitting, and also pre-fills it when that URL is opened.
 - The token service accepts 64 lowercase hex characters; anything else returns
   `INVALID_QR`.
-- `?qrToken=` on `check-in.php` pre-fills the form but never auto-submits.
+- `?qrToken=` on `check-in.php` pre-fills the form but never auto-submits; an
+  empty `qrToken=` counts as no token, and repeat submits are ignored while a
+  request is in flight.
 
 ## 3. Success response — HTTP 201
 
@@ -121,7 +123,9 @@ If `body.code` is known, the UI uses these messages; otherwise it falls back to
 | `SERVER_ERROR` | "We couldn't clock you in right now. Please try again later." |
 
 After a confirmed clock-in, the UI dispatches `attendance:clock-success` so the
-live status badges from S2-12A refresh.
+live status badges from S2-12A refresh. Its detail is
+`{ action: 'clock-in', clockInTime }`, so consumers do not need to parse the
+confirmation text.
 
 ## 7. Example
 

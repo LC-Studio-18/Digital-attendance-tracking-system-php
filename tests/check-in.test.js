@@ -60,6 +60,8 @@ test('a configured endpoint receives a JSON POST with the QR token', async () =>
     assert.equal(harness.elements.submitButton.disabled, false);
     assert.equal(harness.dispatchedEvents.length, 1);
     assert.equal(harness.dispatchedEvents[0].type, 'attendance:clock-success');
+    assert.equal(harness.dispatchedEvents[0].detail.action, 'clock-in');
+    assert.equal(harness.dispatchedEvents[0].detail.clockInTime, '2026-11-27 08:00:00');
 });
 
 test('the proposed status/data envelope is also accepted', async () => {
@@ -225,4 +227,71 @@ test('a missing scanner component disables camera use and offers manual entry', 
     assert.equal(harness.elements.fallback.hidden, false);
     assert.equal(harness.elements.status.dataset.state, 'error');
     assert.match(harness.elements.status.textContent, /cannot scan/i);
+});
+
+test('a second submit is ignored while the first request is in flight', async () => {
+    const harness = createControllerHarness({ endpoint: '/api/check-in.php' });
+    harness.elements.codeInput.value = 'token';
+
+    const first = harness.elements.form.emit('submit');
+    const second = harness.elements.form.emit('submit');
+    await Promise.all([first, second]);
+
+    assert.equal(harness.fetchCalls.length, 1);
+    assert.equal(harness.elements.submitButton.disabled, false);
+});
+
+test('an empty qrToken query parameter does not pre-fill with the URL', () => {
+    const harness = createControllerHarness({ search: '?qrToken=' });
+
+    assert.equal(harness.elements.codeInput.value, '');
+    assert.equal(harness.elements.fallback.hidden, true);
+});
+
+test('a URL with a malformed percent escape keeps the raw token', () => {
+    const harness = createControllerHarness();
+
+    harness.scanners[0].callbacks.onResult(
+        'https://attendance.example.com/clock-in?qrToken=%E0%A4%A'
+    );
+
+    assert.equal(harness.elements.codeInput.value, '%E0%A4%A');
+});
+
+test('a server success message is shown instead of the generic text', async () => {
+    const harness = createControllerHarness({
+        endpoint: '/api/check-in.php',
+        fetchImpl: async () => ({
+            ok: true,
+            status: 201,
+            json: async () => ({
+                ok: true,
+                message: 'Welcome back, Alice.',
+                data: { clocked_in_at_utc: '2026-11-27 08:00:00' }
+            })
+        })
+    });
+    harness.elements.codeInput.value = 'token';
+
+    await harness.elements.form.emit('submit');
+
+    assert.match(harness.elements.result.textContent, /Welcome back, Alice/);
+    assert.doesNotMatch(harness.elements.result.textContent, /Clocked in successfully/);
+});
+
+test('a non-JSON error reply falls back to a generic message', async () => {
+    const harness = createControllerHarness({
+        endpoint: '/api/check-in.php',
+        fetchImpl: async () => ({
+            ok: false,
+            status: 500,
+            json: async () => { throw new Error('not JSON'); }
+        })
+    });
+    harness.elements.codeInput.value = 'token';
+
+    await harness.elements.form.emit('submit');
+
+    assert.equal(harness.elements.result.dataset.state, 'error');
+    assert.match(harness.elements.result.textContent, /Check-in failed/);
 });

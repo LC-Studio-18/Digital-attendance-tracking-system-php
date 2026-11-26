@@ -353,8 +353,9 @@ function createControllerHarness(options = {}) {
         fetch: fetchStub,
         location: { search: search },
         CustomEvent: class CustomEvent {
-            constructor(type) {
+            constructor(type, options) {
                 this.type = type;
+                this.detail = (options && options.detail) || null;
             }
         },
         dispatchEvent: (event) => {
