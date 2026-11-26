@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="assets/css/variables.css">
   <link rel="stylesheet" href="assets/css/base.css">
   <link rel="stylesheet" href="assets/css/attendance-history.css">
+  <link rel="stylesheet" href="assets/css/edit-time-modal.css">
 </head>
 <body>
 <div class="page">
@@ -72,6 +73,102 @@
 
   <!-- Footer: built by a teammate, add it here when it is ready -->
 </div>
-<script src="assets/js/attendance-history.js"></script>
+<dialog
+  class="edit-time-modal"
+  id="edit-time-modal"
+  aria-labelledby="edit-time-title"
+  aria-describedby="edit-time-description"
+  data-edit-time-dialog
+>
+  <header class="edit-time-modal__header">
+    <span class="edit-time-modal__avatar" data-edit-time-initials aria-hidden="true">PH</span>
+    <div class="edit-time-modal__identity">
+      <h2 class="edit-time-modal__title" id="edit-time-title">Edit Employee Attendance</h2>
+      <p class="edit-time-modal__staff">
+        <span data-edit-time-staff-name>Prue Halliwell</span>
+        <span data-edit-time-staff-id>LC-322</span>
+      </p>
+    </div>
+    <button
+      class="edit-time-modal__close"
+      type="button"
+      data-edit-time-close
+      aria-label="Close Edit Time form"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 6l12 12M18 6 6 18"></path>
+      </svg>
+    </button>
+  </header>
+
+  <form class="edit-time-modal__form" data-edit-time-form>
+    <p class="edit-time-modal__description" id="edit-time-description">
+      Update the clock-in or clock-out time and add a reason for the change.
+    </p>
+
+    <div class="edit-time-modal__content">
+      <div class="edit-time-modal__fields">
+        <div class="edit-time-modal__field">
+          <label class="edit-time-modal__label" for="edit-time-clock-in">Clock In</label>
+          <input
+            class="edit-time-modal__input"
+            id="edit-time-clock-in"
+            name="clock-in"
+            type="time"
+          >
+        </div>
+
+        <div class="edit-time-modal__field">
+          <label class="edit-time-modal__label" for="edit-time-clock-out">Clock Out</label>
+          <input
+            class="edit-time-modal__input"
+            id="edit-time-clock-out"
+            name="clock-out"
+            type="time"
+          >
+        </div>
+
+        <div class="edit-time-modal__field">
+          <label class="edit-time-modal__label" for="edit-time-reason">Reason for Change</label>
+          <textarea
+            class="edit-time-modal__textarea"
+            id="edit-time-reason"
+            name="reason"
+            placeholder="Add comment here..."
+            rows="4"
+          ></textarea>
+        </div>
+      </div>
+
+      <aside class="edit-time-modal__clock" aria-label="Current time">
+        <svg class="edit-time-modal__clock-icon" viewBox="0 0 100 100" aria-hidden="true">
+          <circle cx="50" cy="50" r="44"></circle>
+          <path d="M50 24v27l20 12"></path>
+        </svg>
+        <p class="edit-time-modal__clock-label">The time is now:</p>
+        <time class="edit-time-modal__clock-time" data-edit-time-now>--:--</time>
+      </aside>
+    </div>
+
+    <p
+      class="edit-time-modal__notice"
+      data-edit-time-notice
+      role="status"
+      aria-live="polite"
+      hidden
+    ></p>
+
+    <footer class="edit-time-modal__actions">
+      <button class="edit-time-modal__button edit-time-modal__button--cancel" type="button" data-edit-time-close>
+        Cancel
+      </button>
+      <button class="edit-time-modal__button edit-time-modal__button--save" type="submit">
+        Save Changes
+      </button>
+    </footer>
+  </form>
+</dialog>
+<script src="assets/js/edit-time-modal.js" defer></script>
+<script src="assets/js/attendance-history.js" defer></script>
 </body>
 </html>

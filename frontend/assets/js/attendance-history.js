@@ -55,12 +55,22 @@ function render() {
   const rows = USE_DUMMY ? applyFilters(data.records) : data.records;
   $("records").innerHTML = rows.map((r) => {
     const inTime = r.clock_in ? (r.late ? '<span class="late">' + esc(r.clock_in) + "</span>" : esc(r.clock_in)) : "&mdash;";
+    const editButton = '<button class="edit-time-row-button" type="button" data-edit-time-open' +
+      ' data-edit-time-staff-name="' + esc(r.name) + '"' +
+      ' data-edit-time-staff-id="' + esc(r.staff_id) + '"' +
+      ' data-edit-time-clock-in="' + esc(r.clock_in || "") + '"' +
+      ' data-edit-time-clock-out="' + esc(r.clock_out || "") + '"' +
+      ' aria-haspopup="dialog" aria-controls="edit-time-modal"' +
+      ' aria-label="' + esc("Edit attendance times for " + r.name + " (" + r.staff_id + ")") + '">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+      '<path d="m14.7 5.3 4 4M4 20l4.5-1 10.1-10.1a2.1 2.1 0 0 0-3-3L5.5 16 4 20Z"></path>' +
+      "</svg></button>";
     return '<li class="rec"><span class="av" style="background:' + colour(r.staff_id) + '">' + esc(initials(r.name)) + "</span>" +
       '<div class="who"><strong>' + esc(r.name) + "</strong><small>" + esc(r.staff_id) + "</small></div>" +
       '<span class="dept">' + esc(r.department) + '</span><div class="st">' + statusCell(r) + "</div>" +
       '<div class="c"><span class="lbl">In</span>' + inTime + "</div>" +
       '<div class="c"><span class="lbl">Out</span>' + esc(r.clock_out || "\u2014") + "</div>" +
-      '<div class="row-actions" data-staff-id="' + esc(r.staff_id) + '"></div></li>';
+      '<div class="row-actions edit-time-row-actions" data-staff-id="' + esc(r.staff_id) + '">' + editButton + "</div></li>";
   }).join("");
   showMessage(rows.length ? "" : "No records match these filters. Clear a filter to see more.");
   $("status").value = state.status;

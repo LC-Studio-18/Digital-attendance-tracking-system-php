@@ -40,7 +40,7 @@ select.box{appearance:none;-webkit-appearance:none;padding-right:30px;background
 .rec .late{display:block;max-width:92px;margin:0 auto;background:var(--red);color:#fff;border-radius:6px;padding:2px 0;font-weight:600}
 .rec .st{display:flex;justify-content:center}
 .rec .lbl{display:none}
-.row-actions{min-width:44px;min-height:36px} /* space for the pencil/edit button (another teammate builds it) */
+.row-actions{min-width:44px;min-height:36px} /* Reserve space for the row edit control. */
 #message{margin:0;padding:22px;text-align:center;font-size:13px}
 .under{display:flex;align-items:center;gap:60px;margin-top:16px;flex-wrap:wrap}
 .btn{display:inline-flex;align-items:center;gap:8px;background:var(--lime);border:0;border-radius:6px;padding:8px 12px;font:700 13px Inter,sans-serif;cursor:pointer}
