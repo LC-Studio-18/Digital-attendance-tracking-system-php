@@ -115,19 +115,26 @@ function getRecentAttendanceRecords(PDO $pdo, int $staffId): array
         throw new InvalidArgumentException('Invalid staff ID.');
     }
 
+    $timezone = new DateTimeZone('Africa/Johannesburg');
+    $now = new DateTimeImmutable('now', $timezone);
+    $nowTime = $now->format('Y-m-d H:i:s');
+
     $sql = "
         SELECT
             a.record_id,
             a.clock_in,
             a.clock_out,
-            CASE
-                WHEN a.clock_out IS NOT NULL THEN
-                    ROUND(
-                        TIMESTAMPDIFF(SECOND, a.clock_in, a.clock_out) / 3600,
-                        2
+            ROUND(
+                TIMESTAMPDIFF(
+                    SECOND,
+                    a.clock_in,
+                    LEAST(
+                        COALESCE(a.clock_out, :now_time_open),
+                        :now_time_cap
                     )
-                ELSE NULL
-            END AS hours,
+                ) / 3600,
+                2
+            ) AS hours,
             CASE
                 WHEN EXISTS (
                     SELECT 1
@@ -145,7 +152,9 @@ function getRecentAttendanceRecords(PDO $pdo, int $staffId): array
     $stmt = $pdo->prepare($sql);
 
     $stmt->execute([
-    'staff_id' => $staffId
+        'now_time_open' => $nowTime,
+        'now_time_cap' => $nowTime,
+        'staff_id' => $staffId
     ]);
 
     $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -162,6 +171,8 @@ function getRecentAttendanceRecords(PDO $pdo, int $staffId): array
         ];
     }, $records);
 }
+
+    
 
 
 /**
