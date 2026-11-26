@@ -27,15 +27,18 @@ CREATE TABLE IF NOT EXISTS staff (
 
 -- clock_out IS NULL means the shift is still open (status = IN)
 CREATE TABLE IF NOT EXISTS attendance (
-  record_id   INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  staff_id    INT UNSIGNED NOT NULL,
-  clock_in    DATETIME     NOT NULL,
-  clock_out   DATETIME     NULL,
-  created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  record_id     INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  staff_id      INT UNSIGNED NOT NULL,
+  request_token VARCHAR(64)  NULL,
+  clock_in      DATETIME     NOT NULL,
+  clock_out     DATETIME     NULL,
+  created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_attendance_staff
     FOREIGN KEY (staff_id) REFERENCES staff (staff_id)
     ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT uq_attendance_request_token
+    UNIQUE (request_token),
   CONSTRAINT chk_attendance_clock_order
     CHECK (clock_out IS NULL OR clock_out >= clock_in),
   INDEX idx_attendance_staff_clockin  (staff_id, clock_in),
