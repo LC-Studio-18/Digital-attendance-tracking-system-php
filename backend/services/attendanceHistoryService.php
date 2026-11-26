@@ -94,3 +94,110 @@ function isValidAttendanceDate(string $date): bool
     return $dateObject !== false
         && $dateObject->format('Y-m-d') === $date;
 }
+
+/**
+ * Retrieves filtered attendance history with pagination.
+ *
+ * @param PDO $pdo Active database connection.
+ * @param array $filters Optional date and employee filters.
+ * @param int $page Requested page number.
+ * @return array Attendance records and pagination details.
+ */
+function getAttendanceHistory(
+    PDO $pdo,
+    array $filters,
+    int $page = 1
+): array {
+    if ($page < 1) {
+        throw new InvalidArgumentException('Page number must be at least 1.');
+    }
+
+    $perPage = 25;
+    $offset = ($page - 1) * $perPage;
+
+    // Build the reusable filters.
+    $filterResult = buildAttendanceHistoryFilters($filters);
+    $whereSql = $filterResult['where_sql'];
+    $params = $filterResult['params'];
+
+    // Count all records matching the filters.
+    $countSql = "
+        SELECT COUNT(*)
+        FROM attendance a
+        INNER JOIN staff s ON a.staff_id = s.staff_id
+        $whereSql
+    ";
+
+    $countStmt = $pdo->prepare($countSql);
+    $countStmt->execute($params);
+    $totalRecords = (int) $countStmt->fetchColumn();
+
+    // Retrieve the attendance records for the requested page.
+    $historySql = "
+        SELECT
+            a.record_id,
+            s.employee_number,
+            s.first_name,
+            s.last_name,
+            a.clock_in,
+            a.clock_out,
+            CASE
+                WHEN a.clock_out IS NULL THEN 'Still IN'
+                ELSE 'Completed'
+            END AS status,
+            CASE
+                WHEN a.clock_out IS NULL THEN NULL
+                ELSE TIMESTAMPDIFF(SECOND, a.clock_in, a.clock_out)
+            END AS duration_seconds
+        FROM attendance a
+        INNER JOIN staff s ON a.staff_id = s.staff_id
+        $whereSql
+        ORDER BY a.clock_in DESC, a.record_id DESC
+        LIMIT :limit OFFSET :offset
+    ";
+
+    $historyStmt = $pdo->prepare($historySql);
+
+    // Bind the filter values safely.
+    foreach ($params as $name => $value) {
+        $historyStmt->bindValue(':' . $name, $value, PDO::PARAM_STR);
+    }
+
+    // Bind pagination values as integers.
+    $historyStmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+    $historyStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+    $historyStmt->execute();
+    $records = $historyStmt->fetchAll();
+
+    // Format the duration for completed attendance records.
+    foreach ($records as &$record) {
+        if ($record['duration_seconds'] === null) {
+            $record['duration'] = null;
+        } else {
+            $seconds = (int) $record['duration_seconds'];
+            $hours = intdiv($seconds, 3600);
+            $minutes = intdiv($seconds % 3600, 60);
+
+            $record['duration'] = sprintf(
+                '%d hours %d minutes',
+                $hours,
+                $minutes
+            );
+        }
+
+        unset($record['duration_seconds']);
+    }
+
+    unset($record);
+
+    return [
+        'records' => $records,
+        'pagination' => [
+            'current_page' => $page,
+            'per_page' => $perPage,
+            'total_records' => $totalRecords,
+            'total_pages' => (int) ceil($totalRecords / $perPage),
+        ],
+    ];
+}
