@@ -110,3 +110,271 @@ body {
     width: 115px;
   }
 }
+
+/* =========================================
+   APPLICATION FOOTER
+========================================= */
+
+.site-footer {
+  width: calc(100% - 153px - 32px);
+  margin: 24px 16px 16px calc(153px + 16px);
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #0e181f;
+  color: #ffffff;
+  font-family: "TASA Orbiter", sans-serif;
+}
+
+.site-footer__inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+  align-items: stretch;
+  min-height: 175px;
+  background-color: #0e181f;
+}
+
+/* Parallel lime-green diagonal stripe */
+.site-footer__inner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(52% - 22px);
+  width: 34px;
+  background-color: #b2ed1d;
+  clip-path: polygon(24px 0, 100% 0, calc(100% - 24px) 100%, 0 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.site-footer__brand-col {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  padding: 26px 44px 26px 32px;
+}
+
+.site-footer__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-footer__logo {
+  display: block;
+  width: 54px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.site-footer__wordmark {
+  display: block;
+  width: 128px;
+  height: auto;
+  object-fit: contain;
+}
+
+.site-footer__mission {
+  max-width: 300px;
+  margin: 0;
+  color: #e6ecef;
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+/* Teal contact panel with matching diagonal left edge */
+.site-footer__contact-col {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 24px 32px 24px 56px;
+  background-color: #2f6b75;
+  clip-path: polygon(24px 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.site-footer__heading {
+  margin: 0 0 4px;
+  color: #b2ed1d;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.site-footer__details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-style: normal;
+}
+
+.site-footer__line {
+  margin: 0;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.site-footer__link {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.site-footer__link:hover,
+.site-footer__link:focus-visible {
+  color: #b2ed1d;
+  text-decoration: underline;
+}
+
+.site-footer__meta {
+  margin: 4px 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 10.5px;
+  line-height: 1.3;
+}
+
+/* =========================================
+   FOOTER WITHOUT SIDEBAR (e.g., login page)
+========================================= */
+
+body:not(:has(.sidebar)) .site-footer {
+  width: calc(100% - 32px);
+  margin: 24px 16px 16px;
+}
+
+/* =========================================
+   MOBILE & SMALL SCREEN FOOTER (2-COLUMN CARD)
+========================================= */
+
+@media (max-width: 900px) {
+  .site-footer {
+    width: calc(100% - 24px);
+    margin: 16px 12px;
+    border-radius: 8px;
+  }
+
+  .site-footer__inner {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+    min-height: 150px;
+  }
+
+  .site-footer__inner::before {
+    left: calc(49% - 14px);
+    width: 20px;
+    clip-path: polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+  }
+
+  .site-footer__brand-col {
+    gap: 8px;
+    padding: 14px 18px 14px 14px;
+  }
+
+  .site-footer__brand {
+    gap: 6px;
+  }
+
+  .site-footer__logo {
+    width: 34px;
+    height: 26px;
+  }
+
+  .site-footer__wordmark {
+    width: 78px;
+  }
+
+  .site-footer__mission {
+    max-width: 100%;
+    font-size: 9.5px;
+    line-height: 1.35;
+  }
+
+  .site-footer__contact-col {
+    gap: 2px;
+    padding: 14px 12px 14px 24px;
+    clip-path: polygon(14px 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .site-footer__heading {
+    margin-bottom: 2px;
+    font-size: 8.5px;
+    letter-spacing: 0.02em;
+  }
+
+  .site-footer__details {
+    gap: 1px;
+  }
+
+  .site-footer__line {
+    font-size: 8px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  .site-footer__meta {
+    margin-top: 2px;
+    font-size: 7px;
+    line-height: 1.25;
+  }
+}
+
+@media (max-width: 360px) {
+  .site-footer,
+  body:not(:has(.sidebar)) .site-footer {
+    width: calc(100% - 16px);
+    margin: 12px 8px;
+  }
+
+  .site-footer__inner {
+    min-height: 138px;
+  }
+
+  .site-footer__inner::before {
+    left: calc(48% - 11px);
+    width: 16px;
+    clip-path: polygon(11px 0, 100% 0, calc(100% - 11px) 100%, 0 100%);
+  }
+
+  .site-footer__brand-col {
+    padding: 12px 14px 12px 10px;
+  }
+
+  .site-footer__logo {
+    width: 28px;
+    height: 22px;
+  }
+
+  .site-footer__wordmark {
+    width: 66px;
+  }
+
+  .site-footer__mission {
+    font-size: 8.5px;
+  }
+
+  .site-footer__contact-col {
+    padding: 12px 8px 12px 20px;
+    clip-path: polygon(11px 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .site-footer__heading {
+    font-size: 8px;
+  }
+
+  .site-footer__line {
+    font-size: 7.5px;
+  }
+
+  .site-footer__meta {
+    font-size: 6.5px;
+  }
+}
