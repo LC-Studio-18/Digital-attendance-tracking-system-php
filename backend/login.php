@@ -18,7 +18,7 @@ $result = $login->handleLogin($_POST);
 if ($result['success']) {
   $user = $result['user'];
   startAuthenticatedSession([
-    'staff_id' => $user['id'],
+    'staff_id' => $user['staff_id'],
     'role' => $user['role'],
   ]);
 
