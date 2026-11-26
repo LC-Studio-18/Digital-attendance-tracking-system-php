@@ -804,3 +804,16 @@
     color: var(--color-muted);
   }
 }
+
+/* ---------- Small fixes ---------- */
+
+/* The amber bar takes 4px, so the padding gives 4px back and the columns line up */
+.record--corrected {
+  padding-left: 8px;
+}
+
+/* Keep the View All button on one line */
+.records-card__viewall {
+  flex-shrink: 0;
+  white-space: nowrap;
+}

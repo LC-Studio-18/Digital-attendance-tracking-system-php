@@ -229,6 +229,18 @@ function renderGreeting(fullName, today) {
     <span class="user-chip__name">${fullName}</span>
     <span class="user-chip__chevron">${icon("chevron", 16)}</span>
   `;
+  
+  // The user card in the sidebar (only exists on larger screens)
+  const sidebarUser = document.getElementById("sidebar-user");
+  if (sidebarUser) {
+    sidebarUser.innerHTML = `
+      <span class="sidebar-user__avatar">${initials}</span>
+      <div class="sidebar-user__text">
+        <span class="sidebar-user__name">${fullName}</span>
+        <span class="sidebar-user__role">Employee</span>
+      </div>
+    `;
+  }
 }
 
 // ---------- This Week card ----------

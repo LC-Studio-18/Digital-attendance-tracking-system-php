@@ -9,6 +9,8 @@
   min-height: 100vh;
 }
 
+/* ---------- Sidebar ---------- */
+
 /* Dark sidebar */
 .sidebar {
   width: 240px;
@@ -22,7 +24,8 @@
 
 .sidebar__logo {
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: 800;
+  font-style: italic;
   margin-bottom: 32px;
 }
 
@@ -32,9 +35,15 @@
   gap: 8px;
 }
 
+/* Each link is an icon and a label side by side */
 .sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   padding: 12px 16px;
   border-radius: 12px;
+  color: #fff;
+  text-decoration: none;
 }
 
 /* The page you are on is highlighted in lime */
@@ -44,12 +53,107 @@
   font-weight: bold;
 }
 
-/* margin-top: auto pushes Logout to the bottom */
-.sidebar__logout {
+/* Employee Access card: margin-top: auto pushes it, the user card
+   and Logout to the bottom of the sidebar */
+.sidebar__access {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   margin-top: auto;
-  font-weight: bold;
-  color: var(--color-lime);
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--color-teal);
 }
+
+.sidebar__access-pill {
+  align-self: flex-start;
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--color-lime);
+  color: var(--color-navy);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.sidebar__access-role {
+  margin-top: 4px;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.sidebar__access-place {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* The lime dot and the word Live */
+.sidebar__live {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+.sidebar__live-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-lime);
+}
+
+/* User card: avatar, name and role in a thin outlined box */
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+}
+
+.sidebar-user__avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-teal);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.sidebar-user__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sidebar-user__name {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.sidebar-user__role {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+/* Logout sits at the bottom with its icon */
+.sidebar__logout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+  color: var(--color-lime);
+  font-weight: bold;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+/* ---------- Main area ---------- */
 
 /* Main area takes the rest of the width */
 .main {
@@ -74,7 +178,7 @@
   gap: 24px;
 }
 
-/* Row 1: status card (2 parts wide) beside the Clocked Out card (1 part) */
+/* Row 1: status card (a little wider) beside the Clocked Out card */
 .row--status {
   display: grid;
   grid-template-columns: 1.28fr 1fr;
@@ -86,21 +190,35 @@
   min-width: 0;
 }
 
-/* On small screens the two cards stack again */
-@media (max-width: 768px) {
-  .row--status {
-    grid-template-columns: 1fr;
-  }
+/* Row 2: Attendance Overview chart beside the This Week card.
+   Row 3: Attendance History beside the Need Help card. */
+.row--overview,
+.row--history {
+  display: grid;
+  grid-template-columns: 2.7fr 1fr;
+  gap: 24px;
 }
 
-/* ---------- Phone layout: sidebar becomes a bar across the top ---------- */
+.row--overview > *,
+.row--history > * {
+  min-width: 0;
+}
+
+/* ---------- Phone layout (768px and below) ---------- */
 @media (max-width: 768px) {
+  /* The cards in each row stack */
+  .row--status,
+  .row--overview,
+  .row--history {
+    grid-template-columns: 1fr;
+  }
+
   /* Stack the sidebar above the main area */
   .app {
     flex-direction: column;
   }
 
-  /* The sidebar spans the full width and lays its items in a row */
+  /* The sidebar becomes a bar across the top with the logo, links and Logout */
   .sidebar {
     width: 100%;
     flex-direction: row;
@@ -125,7 +243,12 @@
     padding: 8px 12px;
   }
 
-  /* Logout no longer needs to be pushed to the bottom */
+  /* The two cards only show on larger screens */
+  .sidebar__access,
+  .sidebar-user {
+    display: none;
+  }
+
   .sidebar__logout {
     margin-top: 0;
   }
@@ -136,27 +259,26 @@
   }
 }
 
-/* ---------- Rows 2 and 3: wide card beside a narrow card ---------- */
+/* ---------- Small phones (480px and below): keep the top bar compact ---------- */
+@media (max-width: 480px) {
+  .sidebar__link {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
 
-/* Row 2: Attendance Overview chart beside the This Week card.
-   Row 3: Attendance History beside the Need Help card. */
-.row--overview,
-.row--history {
-  display: grid;
-  grid-template-columns: 2.7fr 1fr;
-  gap: 24px;
-}
+  /* The icons beside the links would not fit, so only the words show */
+  .sidebar__link .icon {
+    display: none;
+  }
 
-/* min-width: 0 stops a wide card from pushing the page sideways */
-.row--overview > *,
-.row--history > * {
-  min-width: 0;
-}
+  .sidebar__logout {
+    gap: 6px;
+    font-size: 0.9rem;
+    text-transform: none;
+  }
 
-/* On phones the cards stack again */
-@media (max-width: 768px) {
-  .row--overview,
-  .row--history {
-    grid-template-columns: 1fr;
+  .sidebar__logout .icon {
+    width: 18px;
+    height: 18px;
   }
 }
