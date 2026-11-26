@@ -1,0 +1,8 @@
+/* Shared design tokens */
+:root {
+  --color-ink: #0e181f; /* header, sidebar and footer background */
+  --color-lime: #b2ed1d; /* brand accent and focus outline */
+
+  --header-height-desktop: 97px;
+  --header-height-mobile: 75px;
+}

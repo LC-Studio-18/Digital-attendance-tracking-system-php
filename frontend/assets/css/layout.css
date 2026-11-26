@@ -18,96 +18,76 @@ body {
    APPLICATION HEADER
 ========================================= */
 
-/* Desktop branding is displayed in the sidebar */
 .site-header {
-  display: none;
+  display: flex;
+  align-items: center;
   position: relative;
   z-index: 1100;
-  align-items: center;
   width: 100%;
-  min-height: 75px;
-  background-color: #0e181f;
+  height: var(--header-height-desktop);
+  background-color: var(--color-ink);
 }
 
 .site-header__container {
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
   padding: 0 20px;
 }
 
 .site-header__brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-width: 0;
+  gap: 20px;
   text-decoration: none;
+}
+
+.site-header__brand:focus-visible {
+  outline: 2px solid var(--color-lime);
+  outline-offset: 4px;
 }
 
 .site-header__logo {
   display: block;
-  width: 85px;
-  height: 55px;
   flex-shrink: 0;
-  object-fit: contain;
+  width: 101px;
+  height: 60px;
 }
 
 .site-header__wordmark {
   display: block;
-  width: 150px;
-  max-width: 100%;
+  width: 139px;
   height: auto;
-  object-fit: contain;
 }
 
-/* =========================================
-   MOBILE HEADER
-========================================= */
+/* Desktop pages with a sidebar show the brand there instead */
+@media (min-width: 769px) {
+  body:has(.sidebar) .site-header {
+    display: none;
+  }
+}
 
+/* Mobile header (right padding leaves room for the profile button) */
 @media (max-width: 768px) {
   .site-header {
-    display: flex;
-    min-height: 75px;
+    height: var(--header-height-mobile);
   }
 
   .site-header__container {
-    padding-right: 75px;
-    padding-left: 16px;
-  }
-
-  .site-header__logo {
-    width: 80px;
-    height: 55px;
-  }
-
-  .site-header__wordmark {
-    width: 145px;
-  }
-}
-
-/* =========================================
-   VERY SMALL SCREENS
-========================================= */
-
-@media (max-width: 360px) {
-  .site-header__container {
-    padding-right: 65px;
-    padding-left: 10px;
+    padding: 0 75px 0 12px;
   }
 
   .site-header__brand {
-    gap: 6px;
+    gap: 8px;
   }
 
   .site-header__logo {
-    width: 65px;
-    height: 48px;
+    width: 89px;
+    height: 53px;
   }
 
   .site-header__wordmark {
-    width: 115px;
+    width: 125px;
   }
 }
 

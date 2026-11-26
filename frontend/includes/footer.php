@@ -5,13 +5,11 @@
         <img
           src="./assets/images/LCLogo.svg"
           alt="Life Choices"
-          class="site-footer__logo"
-        >
+          class="site-footer__logo">
         <img
           src="./assets/images/LCAttends.svg"
           alt="LC Attends"
-          class="site-footer__wordmark"
-        >
+          class="site-footer__wordmark">
       </div>
       <p class="site-footer__mission">
         Life Choices invests in young people from all over South Africa, so every one of them has a fair chance in life.
