@@ -13,9 +13,111 @@ $localPreview = in_array($clientAddress, ['127.0.0.1', '::1'], true) && isset($_
 
 /*
  * This file is the front controller for the frontend web root.
- * Route the dashboard API request through to the backend endpoint so the
- * browser never needs to reach backend/ directly.
+ * All browser API calls are routed here so nothing under backend/ has to be
+ * publicly reachable.
  */
+
+$isLogoutApi = strpos($requestPath, '/api/logout') === 0
+    || (($_GET['api'] ?? '') === 'logout');
+
+if ($isLogoutApi) {
+    header('Content-Type: application/json');
+    $_SESSION = [];
+    session_destroy();
+    echo json_encode(['success' => true]);
+    exit;
+}
+
+$isLoginApi = strpos($requestPath, '/api/login') === 0
+    || (($_GET['api'] ?? '') === 'login');
+
+if ($isLoginApi) {
+    header('Content-Type: application/json');
+
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+        exit;
+    }
+
+    $contentType = strtolower($_SERVER['CONTENT_TYPE'] ?? '');
+    if (strpos($contentType, 'application/json') !== false) {
+        $body = json_decode(file_get_contents('php://input'), true);
+        $body = is_array($body) ? $body : [];
+    } else {
+        $body = $_POST;
+    }
+
+    $username = trim((string) ($body['username'] ?? ''));
+    $password = (string) ($body['password'] ?? '');
+    $staff = null;
+
+    // Use the real database once config/credentials.php has been set up.
+    $credentialsFile = __DIR__ . '/../config/credentials.php';
+    if (is_file($credentialsFile) && $username !== '' && $password !== '') {
+        require_once __DIR__ . '/../backend/config/database.php';
+
+        try {
+            $pdo = getDatabaseConnection();
+            $statement = $pdo->prepare(
+                'SELECT staff_id, first_name, last_name, role, password_hash, is_active
+                 FROM staff
+                 WHERE email = :identity OR employee_number = :identity
+                 LIMIT 1'
+            );
+            $statement->execute([':identity' => $username]);
+            $row = $statement->fetch();
+
+            if ($row && (int) $row['is_active'] === 1 &&
+                password_verify($password, $row['password_hash'])) {
+                $staff = [
+                    'id' => (int) $row['staff_id'],
+                    'name' => trim($row['first_name'] . ' ' . $row['last_name']),
+                    'role' => $row['role']
+                ];
+            }
+        } catch (Throwable $exception) {
+            error_log('Login database error: ' . $exception->getMessage());
+        }
+    }
+
+    // Development fallback: seeded accounts from database/seed.sql.
+    if ($staff === null && $username !== '' && $password !== '') {
+        $hash = '$2y$10$tl2J5rrrUe7I3PnTxpjXB.O7FWV6XmY1F5NICRtSsUS/8KqDBP/v.';
+        $seededAccounts = [
+            ['id' => 1, 'email' => 'staff1@example.com', 'number' => 'EMP001', 'name' => 'Test Staff', 'role' => 'staff'],
+            ['id' => 2, 'email' => 'staff2@example.com', 'number' => 'EMP002', 'name' => 'Other Staff', 'role' => 'staff'],
+            ['id' => 3, 'email' => 'manager@example.com', 'number' => 'EMP900', 'name' => 'Test Manager', 'role' => 'manager']
+        ];
+
+        foreach ($seededAccounts as $account) {
+            $matches = strcasecmp($username, $account['email']) === 0
+                || strcasecmp($username, $account['number']) === 0;
+
+            if ($matches && password_verify($password, $hash)) {
+                $staff = [
+                    'id' => $account['id'],
+                    'name' => $account['name'],
+                    'role' => $account['role']
+                ];
+                break;
+            }
+        }
+    }
+
+    if ($staff === null) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Invalid username or password.']);
+        exit;
+    }
+
+    session_regenerate_id(true);
+    $_SESSION['staff_id'] = $staff['id'];
+
+    echo json_encode(['success' => true, 'staff' => $staff]);
+    exit;
+}
+
 $isDashboardApi = strpos($requestPath, '/api/dashboard') === 0
     || (($_GET['api'] ?? '') === 'dashboard');
 
