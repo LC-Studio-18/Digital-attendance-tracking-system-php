@@ -62,3 +62,24 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   INDEX idx_audit_record     (record_id),
   INDEX idx_audit_changed_by (changed_by)
 ) ENGINE=InnoDB;
+
+ALTER TABLE `attendance_db`.`audit_logs` 
+DROP FOREIGN KEY `fk_audit_attendance`,
+DROP FOREIGN KEY `fk_audit_changed_by`;
+ALTER TABLE `attendance_db`.`audit_logs` 
+CHANGE COLUMN `changed_at` `modified_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `new_clock_out`,
+CHANGE COLUMN `audit_id` `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+CHANGE COLUMN `record_id` `attendance_id` INT UNSIGNED NOT NULL ,
+CHANGE COLUMN `changed_by` `admin_id` INT UNSIGNED NOT NULL ,
+CHANGE COLUMN `reason` `reason_modified` VARCHAR(800) NOT NULL ;
+ALTER TABLE `attendance_db`.`audit_logs` 
+ADD CONSTRAINT `fk_audit_attendance`
+  FOREIGN KEY (`attendance_id`)
+  REFERENCES `attendance_db`.`attendance` (`record_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE,
+ADD CONSTRAINT `fk_audit_changed_by`
+  FOREIGN KEY (`admin_id`)
+  REFERENCES `attendance_db`.`staff` (`staff_id`)
+  ON DELETE RESTRICT
+  ON UPDATE CASCADE;
