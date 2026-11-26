@@ -181,3 +181,70 @@ The project is currently in the initial setup phase. The folder structure and ba
 - Create a pull request for review before merging changes.
 - Raise blockers early so dependent tickets are not delayed.
 - Keep ticket status and blockers updated in the project tracker.
+
+## Shared Status Components (loading, success, error, slow, offline)
+
+Reusable UI for any action that calls the server. It shows a loading spinner,
+"Slow connection..." after 5 seconds, an offline message, a success message and
+an error message with a "Try again" button. Retries are safe: the same
+`request_token` is re-sent, so the server records the action only once.
+
+### 1. Include the files
+
+```html
+<link rel="stylesheet" href="frontend/assets/css/component.css">
+<script src="frontend/assets/js/status-states.js"></script>
+<div id="status-box"></div>
+```
+
+Use a dedicated, empty container (`#status-box`). The component replaces its contents.
+
+### 2. Use it
+
+```javascript
+const runner = StatusStates.createActionRunner({
+  container: document.getElementById('status-box'),
+  loadingText: 'Saving...',
+  slowText: 'Slow connection...',
+  successText: 'Clock-in recorded.',
+  errorText: 'Something went wrong. Please try again.',
+  offlineText: "You’re offline. Your action was not sent.",
+  retryLabel: 'Try again',
+  request: ({ token }) => StatusStates.postJson('/backend/api/clock-in.php', {}, token)
+});
+
+button.addEventListener('click', () => runner.start());
+```
+
+Call `runner.start()` for each new user action. "Try again" is handled for you.
+
+### Options
+
+| Option | Purpose |
+|---|---|
+| `container` | Element where the states are shown |
+| `request` | Function that receives `{ token }` and returns a promise |
+| `loadingText`, `slowText`, `successText`, `errorText`, `offlineText`, `retryLabel` | The messages shown to the user |
+
+`successText` can also be a function, e.g. `(res) => res.data.time`.
+
+### Behaviour
+
+- Loading appears after 300 ms; "Slow connection..." after 5 s.
+- When offline, "You’re offline" shows and nothing is sent.
+- The retry button is disabled while a request is running, so rapid taps send once.
+- One `request_token` is created per action and reused on retry. A new one is made only after success.
+
+### Backend contract (S2-13B)
+
+Send `request_token` in the JSON body. Responses look like:
+
+```json
+{ "status": "success", "code": "CLOCKED_IN", "message": "Clock-in recorded.", "data": {} }
+{ "status": "error", "code": "TOKEN_USER_MISMATCH", "message": "Plain-language message." }
+```
+
+`postJson` shows the error `message` on the error card. A retry of an already-saved
+request returns `"status": "success"`, so it appears as success.
+Use a fixed `successText` rather than `res.message`, since a replayed
+response may carry different wording.
