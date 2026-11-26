@@ -1,78 +1,7 @@
 /*
  * layout.css
- * Page structure: the API dashboard in index.php (#dashboard) and the
- * static dashboard mock-up in dashboard.php (sidebar | main).
+ * Page structure: sidebar on the left, main area on the right.
  */
-
-/* The API dashboard in index.php */
-#dashboard {
-    max-width: 1440px;
-    min-height: 100vh;
-    margin: 0 auto;
-    padding: var(--space-lg);
-    background: var(--color-grey-light);
-}
-
-#dashboard .dashboard__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--space-md);
-    margin-bottom: var(--space-lg);
-    padding-bottom: var(--space-md);
-    border-bottom: 1px solid var(--color-border);
-}
-
-.dashboard__updated {
-    flex-shrink: 0;
-    color: var(--color-grey-mid);
-    font-size: var(--font-size-sm);
-    margin: 0;
-}
-
-.dashboard__summary {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-md);
-}
-
-.dashboard__panels {
-    display: grid;
-    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-    gap: var(--space-md);
-    margin-top: var(--space-md);
-}
-
-@media (max-width: 900px) {
-    #dashboard {
-        padding: var(--space-md);
-    }
-
-    #dashboard .dashboard__header {
-        flex-direction: column;
-        gap: var(--space-xs);
-    }
-
-    .dashboard__summary {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .dashboard__panels {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 520px) {
-    #dashboard {
-        padding: var(--space-sm);
-    }
-
-    .dashboard__summary {
-        gap: var(--space-sm);
-    }
-}
-
-/* The static dashboard mock-up in dashboard.php */
 
 /* The whole app is a row: sidebar | main */
 .app {
@@ -139,7 +68,7 @@
 /* ---------- Dashboard rows ---------- */
 
 /* The dashboard sections stack with a gap between them */
-.main .dashboard {
+.dashboard {
   display: flex;
   flex-direction: column;
   gap: 24px;
