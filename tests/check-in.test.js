@@ -44,7 +44,7 @@ test('an empty submission is rejected locally without a network call', async () 
     assert.match(harness.elements.result.textContent, /Enter your check-in code/);
 });
 
-test('a configured endpoint receives a JSON POST with the scanned code', async () => {
+test('a configured endpoint receives a JSON POST with the QR token', async () => {
     const harness = createControllerHarness({ endpoint: '/api/check-in.php' });
     harness.elements.codeInput.value = 'STAFF-42';
 
@@ -53,9 +53,33 @@ test('a configured endpoint receives a JSON POST with the scanned code', async (
     assert.equal(harness.fetchCalls.length, 1);
     assert.equal(harness.fetchCalls[0].url, '/api/check-in.php');
     assert.equal(harness.fetchCalls[0].init.method, 'POST');
-    assert.deepEqual(JSON.parse(harness.fetchCalls[0].init.body), { code: 'STAFF-42' });
-    assert.match(harness.elements.result.textContent, /Checked in successfully/);
+    assert.deepEqual(JSON.parse(harness.fetchCalls[0].init.body), { qrToken: 'STAFF-42' });
+    assert.match(harness.elements.result.textContent, /Clocked in successfully/);
+    assert.match(harness.elements.result.textContent, /2026-11-27 08:00:00/);
+    assert.equal(harness.elements.result.dataset.state, 'success');
     assert.equal(harness.elements.submitButton.disabled, false);
+    assert.equal(harness.dispatchedEvents.length, 1);
+    assert.equal(harness.dispatchedEvents[0].type, 'attendance:clock-success');
+});
+
+test('the proposed status/data envelope is also accepted', async () => {
+    const harness = createControllerHarness({
+        endpoint: '/api/check-in.php',
+        fetchImpl: async () => ({
+            ok: true,
+            json: async () => ({
+                status: 'success',
+                data: { id: 9, clock_in_utc: '2026-11-27T08:00:00Z' }
+            })
+        })
+    });
+    harness.elements.codeInput.value = 'token-9';
+
+    await harness.elements.form.emit('submit');
+
+    assert.equal(harness.elements.result.dataset.state, 'success');
+    assert.match(harness.elements.result.textContent, /Clocked in successfully/);
+    assert.match(harness.elements.result.textContent, /2026-11-27T08:00:00Z/);
 });
 
 test('a backend error message is shown instead of a fake success', async () => {
@@ -73,6 +97,97 @@ test('a backend error message is shown instead of a fake success', async () => {
     assert.equal(harness.elements.result.dataset.state, 'error');
     assert.match(harness.elements.result.textContent, /already used/);
     assert.equal(harness.elements.submitButton.disabled, false);
+    assert.equal(harness.dispatchedEvents.length, 0);
+});
+
+test('QR-specific error codes map to friendly messages', async () => {
+    const cases = [
+        ['INVALID_QR', 400, /invalid/i],
+        ['EXPIRED_QR', 400, /expired/i],
+        ['UNAUTHORIZED', 401, /log in first/i],
+        ['ALREADY_CLOCKED_IN', 409, /already clocked in/i]
+    ];
+
+    for (const [code, status, pattern] of cases) {
+        const harness = createControllerHarness({
+            endpoint: '/api/check-in.php',
+            fetchImpl: async () => ({
+                ok: false,
+                status,
+                json: async () => ({ ok: false, code, message: 'Raw backend detail.' })
+            })
+        });
+        harness.elements.codeInput.value = 'token';
+
+        await harness.elements.form.emit('submit');
+
+        assert.equal(harness.elements.result.dataset.state, 'error', code);
+        assert.match(harness.elements.result.textContent, pattern, code);
+        assert.equal(harness.dispatchedEvents.length, 0, code);
+    }
+});
+
+test('a status:error body is a failure even when HTTP reports success', async () => {
+    const harness = createControllerHarness({
+        endpoint: '/api/check-in.php',
+        fetchImpl: async () => ({
+            ok: true,
+            status: 200,
+            json: async () => ({
+                status: 'error',
+                code: 'EXPIRED_QR',
+                message: 'This QR code has expired.'
+            })
+        })
+    });
+    harness.elements.codeInput.value = 'token';
+
+    await harness.elements.form.emit('submit');
+
+    assert.equal(harness.elements.result.dataset.state, 'error');
+    assert.match(harness.elements.result.textContent, /expired/i);
+});
+
+test('retryAfter is shown in the rate-limit message', async () => {
+    const harness = createControllerHarness({
+        endpoint: '/api/check-in.php',
+        fetchImpl: async () => ({
+            ok: false,
+            status: 429,
+            json: async () => ({
+                ok: false,
+                code: 'RATE_LIMITED',
+                message: 'Too many attempts.',
+                retryAfter: 25
+            })
+        })
+    });
+    harness.elements.codeInput.value = 'token';
+
+    await harness.elements.form.emit('submit');
+
+    assert.match(harness.elements.result.textContent, /Try again in 25 seconds/);
+});
+
+test('a scanned clock-in URL is reduced to its qrToken', () => {
+    const harness = createControllerHarness();
+
+    harness.scanners[0].callbacks.onResult(
+        'https://attendance.example.com/clock-in?qrToken=abc123%2Ddef'
+    );
+
+    assert.equal(harness.elements.codeInput.value, 'abc123-def');
+});
+
+test('a qrToken query parameter pre-fills the form without submitting', async () => {
+    const harness = createControllerHarness({
+        endpoint: '/api/check-in.php',
+        search: '?qrToken=from-url'
+    });
+
+    assert.equal(harness.elements.codeInput.value, 'from-url');
+    assert.equal(harness.elements.fallback.hidden, false);
+    assert.equal(harness.fetchCalls.length, 0);
 });
 
 test('no endpoint yet shows a pending message and makes no request', async () => {

@@ -4,9 +4,10 @@
  * What it does:
  *  - finds the page elements through `data-checkin-*` hooks,
  *  - turns scanner states and error reasons into visible messages/button states,
- *  - places a scanned code into the manual form for user confirmation,
+ *  - places a scanned QR token into the manual form for user confirmation,
+ *  - accepts either a raw token or the clock-in URL encoded in the QR code,
  *  - offers manual entry whenever the camera cannot be used,
- *  - handles form submission with a fetch call that is ready for a backend route.
+ *  - POSTs the token to the configured check-in route and maps API errors.
  *
  * It is loaded after qr-scanner.js and creates one QrScanner instance. The
  * scanner never submits data itself: this file is the only place that decides
@@ -49,6 +50,23 @@
         'unsupported-format': 'This browser cannot detect QR codes with the camera. Enter your code manually below.',
         'camera-error': 'The camera could not be started. Enter your code manually below.',
         'detect-error': 'QR detection stopped unexpectedly. Try again, or enter your code manually below.'
+    };
+
+    // User-facing wording for API error codes. The backend sends a safe
+    // `message` too, but a known code always wins so wording stays consistent.
+    // The older manual-code codes are kept for the draft contract in docs/.
+    const ERROR_MESSAGES = {
+        INVALID_QR: 'This QR code is invalid. Check the code and try again.',
+        EXPIRED_QR: 'This QR code has expired. Ask for a new one.',
+        UNAUTHORIZED: 'Please log in first, then try your QR code again.',
+        ALREADY_CLOCKED_IN: 'You are already clocked in.',
+        ALREADY_CHECKED_IN: 'You are already checked in.',
+        INVALID_REQUEST: "Something went wrong with the request. Please try again.",
+        INVALID_CODE: "That code doesn't look right. Check it and try again.",
+        DUPLICATE_SCAN: "That code was just scanned. Please wait a moment before trying again.",
+        UNKNOWN_CODE: "We couldn't find that code. Ask your supervisor to check it.",
+        RATE_LIMITED: 'Too many attempts. Please wait a moment and try again.',
+        SERVER_ERROR: "We couldn't clock you in right now. Please try again later."
     };
 
     // scanner is created at the end of this file; hasCapturedCode lets the
@@ -133,6 +151,39 @@
         setStatus(MESSAGES.idle, 'idle');
     }
 
+    /**
+     * Accepts either a raw QR token or the clock-in URL that the token issuer
+     * encodes in the QR code, e.g. .../clock-in?qrToken=<token>.
+     */
+    function extractQrToken(rawValue) {
+        const trimmed = String(rawValue == null ? '' : rawValue).trim();
+        const match = trimmed.match(/[?&]qrToken=([^&#]+)/i);
+
+        if (!match) {
+            return trimmed;
+        }
+
+        try {
+            return decodeURIComponent(match[1]).trim();
+        } catch (error) {
+            return match[1].trim();
+        }
+    }
+
+    /** Finds a clock-in timestamp in either supported success envelope. */
+    function clockInTimeFrom(body) {
+        const data = (body && body.data) || {};
+        return data.clock_in_utc || data.clocked_in_at_utc || data.clock_in_time || '';
+    }
+
+    /** Announces a confirmed clock-in so live status badges can refresh. */
+    function announceClockIn() {
+        if (typeof window.CustomEvent !== 'function' || typeof window.dispatchEvent !== 'function') {
+            return;
+        }
+        window.dispatchEvent(new window.CustomEvent('attendance:clock-success'));
+    }
+
     /** Handles a scanned QR value: stop the camera, fill the form, ask to confirm. */
     function handleScan(code) {
         hasCapturedCode = true;
@@ -141,7 +192,7 @@
         }
 
         // textContent (not innerHTML) is used everywhere for scanned values.
-        codeInput.value = code;
+        codeInput.value = extractQrToken(code);
         result.hidden = true;
         showFallback(MESSAGES.captured);
         setStatus(MESSAGES.captured, 'success');
@@ -179,12 +230,12 @@
     }
 
     /**
-     * TODO(backend): the check-in API does not exist yet. Set
-     * data-checkin-endpoint on the form in check-in.php to its route, then this
-     * POST sends { code } and the caller displays the response message.
-     * An empty endpoint returns { pending: true } so no fake success is shown.
+     * POSTs the token to the configured check-in route. Backend services return
+     * { ok, code, data }; the proposed { status, data } envelope is accepted as
+     * well so the UI keeps working if that shape is adopted later. An empty
+     * endpoint returns { pending: true } so no fake success is shown.
      */
-    async function submitCheckIn(code) {
+    async function submitCheckIn(qrToken) {
         const endpoint = form.dataset.checkinEndpoint;
 
         if (!endpoint) {
@@ -198,7 +249,7 @@
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ code: code })
+            body: JSON.stringify({ qrToken: qrToken })
         });
 
         // A non-JSON reply is treated as an empty body; the response status is
@@ -207,11 +258,44 @@
             return null;
         });
 
-        if (!response.ok) {
-            throw new Error((body && body.message) || 'Check-in failed. Please try again.');
+        const reportedFailure = body && (body.ok === false || body.status === 'error');
+
+        if (!response.ok || reportedFailure) {
+            const error = new Error(
+                (body && body.message) || 'Check-in failed. Please try again.'
+            );
+            error.code = (body && body.code) || '';
+            error.retryAfter = (body && body.retryAfter) || null;
+            error.httpStatus = response.status;
+            throw error;
         }
 
-        return body || {};
+        const clockInTime = clockInTimeFrom(body);
+        let message = (body && body.message) || 'Clocked in successfully.';
+        if (clockInTime && !(body && body.message)) {
+            message += ' Clock-in time: ' + clockInTime + '.';
+        }
+
+        return {
+            message: message,
+            clockInTime: clockInTime,
+            pending: false
+        };
+    }
+
+    /** Turns an API error into a safe, consistent user-facing message. */
+    function messageForError(error) {
+        const code = String((error && error.code) || '');
+        let message = ERROR_MESSAGES[code] ||
+            (error && error.message) ||
+            'Check-in failed. Please try again.';
+
+        const retryAfter = Number(error && error.retryAfter);
+        if (Number.isFinite(retryAfter) && retryAfter > 0) {
+            message += ' Try again in ' + Math.ceil(retryAfter) + ' seconds.';
+        }
+
+        return message;
     }
 
     // Camera controls.
@@ -243,8 +327,8 @@
     form.addEventListener('submit', async function (event) {
         event.preventDefault();
 
-        const code = codeInput.value.trim();
-        if (!code) {
+        const qrToken = extractQrToken(codeInput.value);
+        if (!qrToken) {
             setResult('Enter your check-in code before confirming.', 'error');
             codeInput.focus();
             return;
@@ -254,15 +338,15 @@
         setResult('Checking in…', 'idle');
 
         try {
-            const response = await submitCheckIn(code);
-            setResult(
-                response.pending
-                    ? 'Code ready. Backend check-in will be connected in the next task.'
-                    : (response.message || 'Checked in successfully.'),
-                response.pending ? 'idle' : 'success'
-            );
+            const response = await submitCheckIn(qrToken);
+            if (response.pending) {
+                setResult('Code ready. Backend check-in will be connected in the next task.', 'idle');
+            } else {
+                setResult(response.message, 'success');
+                announceClockIn();
+            }
         } catch (error) {
-            setResult(error.message || 'Check-in failed. Please try again.', 'error');
+            setResult(messageForError(error), 'error');
         } finally {
             submitButton.disabled = false;
         }
@@ -283,5 +367,17 @@
         cameraButton.hidden = true;
         setStatus(MESSAGES.unsupported, 'error');
         showFallback(MESSAGES.manual);
+    }
+
+    // The token issuer encodes .../clock-in?qrToken=<token> in the QR code.
+    // Opening that link pre-fills the token for confirmation; it never submits
+    // automatically, so a stray visit cannot clock someone in by accident.
+    const locationSearch = (window.location && window.location.search) || '';
+    const initialToken = extractQrToken(locationSearch);
+    if (initialToken) {
+        codeInput.value = initialToken;
+        result.hidden = true;
+        showFallback(MESSAGES.captured);
+        setStatus(MESSAGES.captured, 'success');
     }
 })();

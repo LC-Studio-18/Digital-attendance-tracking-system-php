@@ -23,8 +23,11 @@ From the project root:
 node --test tests/*.test.js
 ```
 
-Current result: 18 tests, all passing. The tests use fake cameras and fake
-detector results, so they are deterministic and never ask for real permission.
+Current result: 24 tests, all passing. They cover the QR-token POST shape, both
+supported response envelopes, QR-specific error codes, clock-in URL/query
+pre-fill, and the badge-refresh event, in addition to the camera behaviour. The
+tests use fake cameras and fake detector results, so they are deterministic and
+never ask for real permission.
 
 ## What the automated tests do not cover
 

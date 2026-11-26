@@ -273,10 +273,15 @@ const SELECTORS = {
 
 /**
  * Loads check-in.js into a fake page and returns handles for assertions.
- * Options: scannerAvailable, endpoint, and fetchImpl (custom response).
+ * Options: scannerAvailable, endpoint, search (URL query), and fetchImpl.
  */
 function createControllerHarness(options = {}) {
-    const { scannerAvailable = true, endpoint = '', fetchImpl = null } = options;
+    const {
+        scannerAvailable = true,
+        endpoint = '',
+        search = '',
+        fetchImpl = null
+    } = options;
 
     const bySelector = new Map();
     const elements = {};
@@ -324,11 +329,21 @@ function createControllerHarness(options = {}) {
         }
         return {
             ok: true,
-            json: async () => ({ message: 'Checked in successfully.' })
+            status: 201,
+            json: async () => ({
+                ok: true,
+                code: 'CLOCKED_IN',
+                data: {
+                    id: 123,
+                    user_id: 45,
+                    clocked_in_at_utc: '2026-11-27 08:00:00'
+                }
+            })
         };
     };
 
     const windowEvents = {};
+    const dispatchedEvents = [];
 
     const sandbox = {
         console,
@@ -336,6 +351,15 @@ function createControllerHarness(options = {}) {
             querySelector: (selector) => bySelector.get(selector) || null
         },
         fetch: fetchStub,
+        location: { search: search },
+        CustomEvent: class CustomEvent {
+            constructor(type) {
+                this.type = type;
+            }
+        },
+        dispatchEvent: (event) => {
+            dispatchedEvents.push(event);
+        },
         addEventListener: (type, handler) => {
             windowEvents[type] = handler;
         }
@@ -349,7 +373,7 @@ function createControllerHarness(options = {}) {
     vm.createContext(sandbox);
     vm.runInContext(CONTROLLER_SOURCE, sandbox);
 
-    return { elements, scanners, fetchCalls, windowEvents, sandbox };
+    return { elements, scanners, fetchCalls, windowEvents, dispatchedEvents, sandbox };
 }
 
 module.exports = {

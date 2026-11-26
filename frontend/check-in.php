@@ -41,7 +41,7 @@ $assetBase = rtrim(BASE_URL, '/');
         <header class="qr-checkin-header">
             <span class="qr-checkin-header__eyebrow"><?= $e(APP_NAME) ?></span>
             <h1 class="qr-checkin-header__title">Check in with your QR code</h1>
-            <p class="qr-checkin-header__subtitle">Scan the code on your staff badge, or enter your code manually.</p>
+            <p class="qr-checkin-header__subtitle">Scan the QR code on your staff badge, or paste its token manually.</p>
         </header>
 
         <!-- Scanner card groups the live status, camera viewport and controls. -->
@@ -80,21 +80,22 @@ $assetBase = rtrim(BASE_URL, '/');
                 <h3 class="qr-checkin-manual-entry__title" id="qr-checkin-manual-heading">Enter your code</h3>
                 <p class="qr-checkin-manual-entry__hint" data-checkin-fallback-message></p>
 
-                <!-- TODO(backend): set data-checkin-endpoint to the check-in API route once it exists.
-                     check-in.js already POSTs { code } there; an empty value means "not connected yet". -->
-                <!-- novalidate: JavaScript validates the code and shows an inline message instead. -->
-                <form class="qr-checkin-form" data-checkin-form data-checkin-endpoint="" novalidate>
-                    <label class="qr-checkin-form__label" for="qr-checkin-code">Check-in code</label>
+                <!-- check-in.js POSTs { qrToken } to this route. It is a frontend
+                     config value: clearing it disables the request until the API
+                     is deployed. -->
+                <!-- novalidate: JavaScript validates the token and shows an inline message instead. -->
+                <form class="qr-checkin-form" data-checkin-form data-checkin-endpoint="<?= $e($assetBase . '/api/check-in.php') ?>" novalidate>
+                    <label class="qr-checkin-form__label" for="qr-checkin-code">QR token</label>
                     <input
                         class="qr-checkin-form__input"
                         id="qr-checkin-code"
-                        name="code"
+                        name="qrToken"
                         data-checkin-code
                         type="text"
                         inputmode="text"
                         autocomplete="off"
                         spellcheck="false"
-                        placeholder="e.g. STAFF-1234"
+                        placeholder="Scan the QR code or paste its token"
                         required
                     >
                     <button class="qr-checkin-button qr-checkin-button--primary" type="submit" data-checkin-submit>Confirm check-in</button>
