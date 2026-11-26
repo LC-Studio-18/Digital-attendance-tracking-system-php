@@ -101,7 +101,8 @@
     </button>
   </header>
 
-  <form class="edit-time-modal__form" data-edit-time-form>
+  <form class="edit-time-modal__form" id="editTimeForm" data-edit-time-form>
+    <input type="hidden" id="attendanceId" name="attendance_id">
     <p class="edit-time-modal__description" id="edit-time-description">
       Update the clock-in or clock-out time and add a reason for the change.
     </p>
@@ -109,21 +110,21 @@
     <div class="edit-time-modal__content">
       <div class="edit-time-modal__fields">
         <div class="edit-time-modal__field">
-          <label class="edit-time-modal__label" for="edit-time-clock-in">Clock In</label>
+          <label class="edit-time-modal__label" for="clockInInput">Clock In</label>
           <input
             class="edit-time-modal__input"
-            id="edit-time-clock-in"
-            name="clock-in"
+            id="clockInInput"
+            name="clock_in"
             type="time"
           >
         </div>
 
         <div class="edit-time-modal__field">
-          <label class="edit-time-modal__label" for="edit-time-clock-out">Clock Out</label>
+          <label class="edit-time-modal__label" for="clockOutInput">Clock Out</label>
           <input
             class="edit-time-modal__input"
-            id="edit-time-clock-out"
-            name="clock-out"
+            id="clockOutInput"
+            name="clock_out"
             type="time"
           >
         </div>

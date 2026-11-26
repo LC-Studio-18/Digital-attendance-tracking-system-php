@@ -55,7 +55,8 @@ function render() {
   const rows = USE_DUMMY ? applyFilters(data.records) : data.records;
   $("records").innerHTML = rows.map((r) => {
     const inTime = r.clock_in ? (r.late ? '<span class="late">' + esc(r.clock_in) + "</span>" : esc(r.clock_in)) : "&mdash;";
-    const editButton = '<button class="edit-time-row-button" type="button" data-edit-time-open' +
+    const recordId = esc(r.record_id ?? "");
+    const editButton = '<button class="edit-time-row-button" type="button" data-edit-time-open data-record-id="' + recordId + '"' +
       ' data-edit-time-staff-name="' + esc(r.name) + '"' +
       ' data-edit-time-staff-id="' + esc(r.staff_id) + '"' +
       ' data-edit-time-clock-in="' + esc(r.clock_in || "") + '"' +
@@ -65,7 +66,7 @@ function render() {
       '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
       '<path d="m14.7 5.3 4 4M4 20l4.5-1 10.1-10.1a2.1 2.1 0 0 0-3-3L5.5 16 4 20Z"></path>' +
       "</svg></button>";
-    return '<li class="rec"><span class="av" style="background:' + colour(r.staff_id) + '">' + esc(initials(r.name)) + "</span>" +
+    return '<li class="rec" data-record-id="' + recordId + '"><span class="av" style="background:' + colour(r.staff_id) + '">' + esc(initials(r.name)) + "</span>" +
       '<div class="who"><strong>' + esc(r.name) + "</strong><small>" + esc(r.staff_id) + "</small></div>" +
       '<span class="dept">' + esc(r.department) + '</span><div class="st">' + statusCell(r) + "</div>" +
       '<div class="c"><span class="lbl">In</span>' + inTime + "</div>" +
@@ -90,6 +91,29 @@ function renderStatic() {
   $("activity").innerHTML = data.recent_activity.map((a) =>
     "<li><span>" + esc(a.time) + "</span><span>" + esc(a.name) + (a.action ? "<em>&bull;" + esc(a.action) + "</em>" : "") + "</span></li>").join("");
 }
+
+window.EditTime = window.EditTime || {};
+window.EditTime.updateAttendanceRow = function (recordId, clockIn, clockOut) {
+  if (!data) {
+    throw new Error("Attendance records are not loaded.");
+  }
+
+  const record = data.records.find((item) => String(item.record_id) === String(recordId));
+  if (!record) {
+    throw new Error("The attendance record could not be found. Refresh the page and try again.");
+  }
+
+  record.clock_in = clockIn || null;
+  record.clock_out = clockOut || null;
+  data.recent_activity.unshift({
+    time: new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date()),
+    name: record.name,
+    action: "Time Corrected"
+  });
+
+  renderStatic();
+  render();
+};
 
 function setFilter(key, value) { state[key] = value; syncUrl(); render(); }
 
