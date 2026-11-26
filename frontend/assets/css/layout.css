@@ -1,4 +1,11 @@
-.dashboard {
+/*
+ * layout.css
+ * Page structure: the API dashboard in index.php (#dashboard) and the
+ * static dashboard mock-up in dashboard.php (sidebar | main).
+ */
+
+/* The API dashboard in index.php */
+#dashboard {
     max-width: 1440px;
     min-height: 100vh;
     margin: 0 auto;
@@ -6,7 +13,7 @@
     background: var(--color-grey-light);
 }
 
-.dashboard__header {
+#dashboard .dashboard__header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -37,11 +44,11 @@
 }
 
 @media (max-width: 900px) {
-    .dashboard {
+    #dashboard {
         padding: var(--space-md);
     }
 
-    .dashboard__header {
+    #dashboard .dashboard__header {
         flex-direction: column;
         gap: var(--space-xs);
     }
@@ -56,11 +63,146 @@
 }
 
 @media (max-width: 520px) {
-    .dashboard {
+    #dashboard {
         padding: var(--space-sm);
     }
 
     .dashboard__summary {
         gap: var(--space-sm);
     }
+}
+
+/* The static dashboard mock-up in dashboard.php */
+
+/* The whole app is a row: sidebar | main */
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Dark sidebar */
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--color-navy);
+  color: #fff;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar__logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 32px;
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar__link {
+  padding: 12px 16px;
+  border-radius: 12px;
+}
+
+/* The page you are on is highlighted in lime */
+.sidebar__link--active {
+  background: var(--color-lime);
+  color: var(--color-navy);
+  font-weight: bold;
+}
+
+/* margin-top: auto pushes Logout to the bottom */
+.sidebar__logout {
+  margin-top: auto;
+  font-weight: bold;
+  color: var(--color-lime);
+}
+
+/* Main area takes the rest of the width */
+.main {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+/* ---------- Dashboard rows ---------- */
+
+/* The dashboard sections stack with a gap between them */
+.main .dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Row 1: status card (2 parts wide) beside the Clocked Out card (1 part) */
+.row--status {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+/* min-width: 0 stops a wide card from pushing the page sideways */
+.row--status > * {
+  min-width: 0;
+}
+
+/* On small screens the two cards stack again */
+@media (max-width: 768px) {
+  .row--status {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Phone layout: sidebar becomes a bar across the top ---------- */
+@media (max-width: 768px) {
+  /* Stack the sidebar above the main area */
+  .app {
+    flex-direction: column;
+  }
+
+  /* The sidebar spans the full width and lays its items in a row */
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    padding: 12px 16px;
+  }
+
+  .sidebar__logo {
+    margin-bottom: 0;
+    font-size: 1.25rem;
+  }
+
+  .sidebar__nav {
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .sidebar__link {
+    padding: 8px 12px;
+  }
+
+  /* Logout no longer needs to be pushed to the bottom */
+  .sidebar__logout {
+    margin-top: 0;
+  }
+
+  /* Less padding around the content on small screens */
+  .main {
+    padding: 16px;
+  }
 }

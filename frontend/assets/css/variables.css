@@ -1,4 +1,10 @@
+/*
+ * variables.css
+ * Colours and sizes used across the whole site.
+ * Values are estimated from the Figma design; check against Figma Dev mode.
+ */
 :root {
+    /* Brand palette */
     --color-navy: #0b1a2e;
     --color-navy-soft: #132b45;
     --color-lime: #b7f24a;
@@ -11,6 +17,14 @@
     --color-grey-dark: #1f2933;
     --color-border: #e3e8ee;
 
+    /* Aliases used by the static dashboard mock-up */
+    --color-bg: var(--color-grey-light);
+    --color-card: var(--color-white);
+    --color-text: var(--color-grey-dark);
+    --color-muted: #6b7a82;
+    --color-out-bg: #e6e8ea;
+
+    /* Attendance status colours */
     --color-present-bg: #fde8ef;
     --color-present-text: #be185d;
     --color-absent-bg: #e0f2fe;
@@ -30,6 +44,7 @@
     --radius-sm: 8px;
     --radius-md: 14px;
     --radius-lg: 20px;
+    --radius-card: 16px;
     --radius-pill: 999px;
 
     --space-xs: 6px;

@@ -1,3 +1,9 @@
+/*
+ * base.css
+ * Basic page styles: reset, font, background and text colour.
+ * Uses the colours from variables.css.
+ */
+
 *,
 *::before,
 *::after {
@@ -20,6 +26,12 @@ body {
     font-size: var(--font-size-base);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+}
+
+/* Stops images from overflowing their box */
+img {
+  max-width: 100%;
+  display: block;
 }
 
 h1,
@@ -57,4 +69,5 @@ button {
 
 a {
     color: inherit;
+    text-decoration: none;
 }

@@ -1,3 +1,11 @@
+/*
+ * component.css
+ * Styles for the API dashboard components (index.php) and the cards in
+ * the static dashboard mock-up (dashboard.php).
+ */
+
+/* ---------- API dashboard components ---------- */
+
 .dashboard__state {
     display: flex;
     align-items: center;
@@ -227,4 +235,269 @@ button:hover,
 button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+/* ---------- Static dashboard mock-up cards ---------- */
+
+/* ---------- Status card (IN / OUT) ---------- */
+
+/* The card is a row: icon | status | time */
+.status-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 24px;
+  border-radius: var(--radius-card);
+}
+
+/* IN = lime green, OUT = grey */
+.status-card--in {
+  background: var(--color-lime);
+  color: var(--color-navy);
+}
+
+.status-card--out {
+  background: var(--color-out-bg);
+  color: var(--color-text);
+}
+
+/* Round icon with the tick */
+.status-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 1.75rem;
+  font-weight: bold;
+}
+
+/* The status part and the time part stack their text */
+.status-card__main,
+.status-card__time {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* A thin line between the status part and the time part */
+.status-card__time {
+  padding-left: 20px;
+  border-left: 1px solid rgba(11, 29, 38, 0.3);
+}
+
+.status-card__label {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.status-card__value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+/* The time is smaller than the IN / OUT text */
+.status-card__value--time {
+  font-size: 1.75rem;
+}
+
+.status-card__pill {
+  align-self: flex-start;
+  padding: 2px 12px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}
+
+.status-card__date {
+  font-size: 0.8rem;
+}
+
+/* ---------- Clocked Out card (grey card beside the status card) ---------- */
+
+/* The card stacks its text: label, time, note, last updated */
+.clocked-out-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px 24px;
+  border-radius: var(--radius-card);
+  background: var(--color-out-bg);
+  color: var(--color-text);
+}
+
+.clocked-out-card__label {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+/* The big --:-- (or the clock-out time) */
+.clocked-out-card__time {
+  font-size: 1.75rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.clocked-out-card__note {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* The white "Last updated" box at the bottom of the card */
+.clocked-out-card__updated {
+  margin-top: 8px;
+  padding: 6px 12px;
+  border: 1px solid rgba(11, 29, 38, 0.2);
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 0.8rem;
+}
+
+/* ---------- Hours summary cards (Today and This week) ---------- */
+
+/* The section holds two cards side by side */
+#hours-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.hours-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 20px 24px;
+  border-radius: var(--radius-card);
+  background: #ffffff;
+  border: 1px solid rgba(11, 29, 38, 0.12);
+  color: var(--color-text);
+}
+
+.hours-card__label {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.hours-card__value {
+  font-size: 2rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+/* On very small screens the two cards stack */
+@media (max-width: 480px) {
+  #hours-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Recent records (Attendance History) ---------- */
+
+.records-card {
+  padding: 20px 24px;
+  border-radius: var(--radius-card);
+  background: #ffffff;
+  border: 1px solid rgba(11, 29, 38, 0.12);
+  color: var(--color-text);
+}
+
+.records-card__title {
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+}
+
+.records-card__empty {
+  color: #6b7280;
+}
+
+/* Remove the bullet points and the default list spacing */
+.records-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* One row per record, with a thin line between rows */
+.record {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(11, 29, 38, 0.1);
+}
+
+.record:last-child {
+  border-bottom: none;
+}
+
+.record__date {
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+/* In / Out / hours sit in a row and wrap on narrow screens */
+.record__times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 0.9rem;
+}
+
+/* Corrected records: amber bar on the left and a tinted background */
+.record--corrected {
+  padding-left: 12px;
+  border-left: 4px solid #f59e0b;
+  background: #fffbeb;
+}
+
+/* The "Corrected" tag next to the date */
+.record__tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: #f59e0b;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+/* ---------- Phone sizes: tighter status card ---------- */
+@media (max-width: 480px) {
+  .status-card {
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .status-card__icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.4rem;
+  }
+
+  .status-card__time {
+    padding-left: 12px;
+  }
+
+  .status-card__value {
+    font-size: 2rem;
+  }
+
+  .status-card__value--time {
+    font-size: 1.35rem;
+  }
+
+  /* Keep these on one line instead of wrapping */
+  .status-card__label,
+  .status-card__value--time,
+  .status-card__pill {
+    white-space: nowrap;
+  }
+
+  .clocked-out-card,
+  .hours-card,
+  .records-card {
+    padding: 16px;
+  }
 }
