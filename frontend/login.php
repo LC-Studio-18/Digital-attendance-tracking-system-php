@@ -61,7 +61,7 @@ unset($_SESSION['login_error'], $_SESSION['old_email']);
       </div>
 
       <!-- Confirm exact POST target path with Lisekho (e.g. ../backend/auth/login.php) -->
-      <form id="loginForm" action="../backend/login.php" method="post" novalidate>
+      <form id="loginForm" action="./login-submit.php" method="post" novalidate>
         <div class="login-field">
           <label for="email" class="login-label--email">Email address</label>
           <div class="login-input-wrap">
