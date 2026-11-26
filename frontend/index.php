@@ -131,6 +131,23 @@ header('Cache-Control: no-store');
                 'attendance:clocked-out'
             ];
 
+            // Sample data from the dashboard-ui branch (frontend/assets/js/dashboard.js).
+            // Used when the dashboard API is not available yet, or in ?preview=1.
+            var DUMMY_DATA = {
+                status: 'IN',
+                clockInDisplay: '09:15 AM',
+                clockInDateDisplay: 'Today, 24 Mar 2025',
+                hours: { today: 4.5, week: 22.25 },
+                clockOutDisplay: null,
+                lastUpdatedDisplay: '24 Mar 2025, 09:15 AM',
+                generated_at: '2025-03-24 09:15:00',
+                recent_records: [
+                    { record_id: 4, clock_in: '2026-11-24 09:15:00', clock_out: null, hours: null, is_corrected: false },
+                    { record_id: 3, clock_in: '2026-11-23 08:30:00', clock_out: '2026-11-23 16:30:00', hours: 8, is_corrected: true },
+                    { record_id: 2, clock_in: '2026-11-22 08:25:00', clock_out: '2026-11-22 16:30:00', hours: 8.08, is_corrected: false }
+                ]
+            };
+
             var dashboard = document.getElementById('dashboard');
             var contentEl = document.getElementById('dashboard-content');
             var todayEl = document.getElementById('today-date');
@@ -235,13 +252,14 @@ header('Cache-Control: no-store');
                 return null;
             }
 
-            // Maps GET /api/dashboard JSON to the values the page renders.
+            // Maps GET /api/dashboard JSON (and the sample data) to page values.
             function normalise(raw) {
                 var data = raw && typeof raw === 'object' ? raw : {};
                 var hours = data.hours || {};
                 var records = Array.isArray(data.recent_records)
                     ? data.recent_records
-                    : (Array.isArray(data.recentActivity) ? data.recentActivity : []);
+                    : (Array.isArray(data.records) ? data.records
+                        : (Array.isArray(data.recentActivity) ? data.recentActivity : []));
                 var status = String(data.status || '').toUpperCase() === 'IN' ? 'IN' : 'OUT';
 
                 return {
@@ -253,6 +271,10 @@ header('Cache-Control: no-store');
                     records: records.slice(0, 10),
                     clockInAt: firstClock(records, 'clock_in'),
                     clockOutAt: firstClock(records, 'clock_out'),
+                    clockInDisplay: data.clockInDisplay || data.clockedInAt || null,
+                    clockInDateDisplay: data.clockInDateDisplay || data.dateText || null,
+                    clockOutDisplay: data.clockOutDisplay || data.clockedOutAt || null,
+                    lastUpdatedDisplay: data.lastUpdatedDisplay || data.lastUpdated || null,
                     generatedAt: data.generated_at || data.generatedAt || null
                 };
             }
@@ -260,6 +282,8 @@ header('Cache-Control: no-store');
             function renderStatus(data) {
                 var el = document.getElementById('status-badge');
                 var isIn = data.status === 'IN';
+                var clockInText = data.clockInDisplay || (data.clockInAt ? formatTime(data.clockInAt) : '--:--');
+                var dateText = data.clockInDateDisplay || (data.clockInAt ? formatDate(data.clockInAt) : '');
 
                 el.className = 'status-card ' + (isIn ? 'status-card--in' : 'status-card--out');
                 el.innerHTML =
@@ -271,26 +295,26 @@ header('Cache-Control: no-store');
                     '</div>' +
                     '<div class="status-card__time">' +
                         '<span class="status-card__label">Clocked In At</span>' +
-                        '<span class="status-card__value status-card__value--time">' +
-                            escapeHtml(data.clockInAt ? formatTime(data.clockInAt) : '--:--') +
-                        '</span>' +
-                        '<span class="status-card__date">' +
-                            escapeHtml(data.clockInAt ? formatDate(data.clockInAt) : '') +
-                        '</span>' +
+                        '<span class="status-card__value status-card__value--time">' + escapeHtml(clockInText) + '</span>' +
+                        '<span class="status-card__date">' + escapeHtml(dateText) + '</span>' +
                     '</div>';
             }
 
             function renderClockedOut(data) {
                 var el = document.getElementById('clocked-out');
-                var clockOut = data.status === 'OUT' ? data.clockOutAt : null;
+                var hasClockOut = Boolean(data.clockOutDisplay || (data.status === 'OUT' && data.clockOutAt));
+                var clockOutText = data.clockOutDisplay ||
+                    (data.clockOutAt ? formatTime(data.clockOutAt) : '--:--');
+                var updatedText = data.lastUpdatedDisplay ||
+                    (data.generatedAt ? formatDateTime(data.generatedAt) : 'just now');
 
                 el.className = 'clocked-out-card';
                 el.innerHTML =
                     '<span class="clocked-out-card__label">Clocked Out</span>' +
-                    '<span class="clocked-out-card__time">' + escapeHtml(clockOut ? formatTime(clockOut) : '--:--') + '</span>' +
-                    '<span class="clocked-out-card__note">' + (clockOut ? 'Shift ended' : 'Not yet clocked out') + '</span>' +
+                    '<span class="clocked-out-card__time">' + escapeHtml(clockOutText) + '</span>' +
+                    '<span class="clocked-out-card__note">' + (hasClockOut ? 'Shift ended' : 'Not yet clocked out') + '</span>' +
                     '<span class="clocked-out-card__updated">' +
-                        'Last updated ' + escapeHtml(data.generatedAt ? formatDateTime(data.generatedAt) : 'just now') +
+                        'Last updated ' + escapeHtml(updatedText) +
                     '</span>';
             }
 
@@ -348,9 +372,8 @@ header('Cache-Control: no-store');
                 });
                 userEl.textContent = STAFF_ID ? 'Staff #' + STAFF_ID : 'Staff';
                 greetingEl.textContent = 'Dashboard';
-                lastUpdatedEl.textContent = data.generatedAt
-                    ? 'Last updated ' + formatDateTime(data.generatedAt)
-                    : '';
+                lastUpdatedEl.textContent = data.lastUpdatedDisplay ||
+                    (data.generatedAt ? 'Last updated ' + formatDateTime(data.generatedAt) : '');
 
                 renderStatus(data);
                 renderClockedOut(data);
@@ -370,9 +393,24 @@ header('Cache-Control: no-store');
                 }
             }
 
+            function showDashboard(data, isSample) {
+                lastData = data;
+                render(data);
+                contentEl.hidden = false;
+                setState('ready');
+                if (isSample) {
+                    lastUpdatedEl.textContent += ' (sample data)';
+                }
+            }
+
             /* ---------- GET /api/dashboard via fetch/AJAX ---------- */
 
             function loadDashboard() {
+                if (PREVIEW) {
+                    showDashboard(normalise(DUMMY_DATA), true);
+                    return Promise.resolve(lastData);
+                }
+
                 if (activeController) {
                     activeController.abort(); // a newer refresh replaces this request
                 }
@@ -398,29 +436,38 @@ header('Cache-Control: no-store');
                 })
                     .then(function (response) {
                         if (!response.ok) {
+                            var status = response.status;
                             return response.json().catch(function () { return null; }).then(function (body) {
-                                throw new Error(body && body.error ? body.error : 'HTTP ' + response.status);
+                                var error = new Error(body && body.error ? body.error : 'HTTP ' + status);
+                                error.useFallback = status === 404 || status === 501;
+                                throw error;
                             });
                         }
                         return response.json();
                     })
                     .then(function (json) {
                         if (!json || typeof json !== 'object') {
-                            throw new Error('Invalid dashboard response');
+                            var error = new Error('Invalid dashboard response');
+                            error.useFallback = true;
+                            throw error;
                         }
                         if (json.error) {
                             throw new Error(json.error);
                         }
 
-                        lastData = normalise(json);
-                        render(lastData);
-                        contentEl.hidden = false;
-                        setState('ready');
+                        showDashboard(normalise(json), false);
                         return lastData;
                     })
                     .catch(function (error) {
                         if (controller.signal.aborted && !timedOut) {
                             return null; // superseded by a newer refresh
+                        }
+
+                        // The endpoint is not available yet: show the sample data
+                        // from the dashboard-ui branch instead of an empty page.
+                        if (error && error.useFallback) {
+                            showDashboard(normalise(DUMMY_DATA), true);
+                            return lastData;
                         }
 
                         var message = timedOut
