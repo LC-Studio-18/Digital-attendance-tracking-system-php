@@ -1,0 +1,63 @@
+/* =========================================
+   Shared Application Header
+========================================= */
+
+.site-header {
+  width: 100%;
+  min-height: 99px;
+  background-color: #0e181f;
+  display: flex;
+  align-items: center;
+}
+
+.site-header__container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+}
+
+.site-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.site-header__logo {
+  display: block;
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.site-header__wordmark {
+  display: block;
+  width: auto;
+  max-width: 180px;
+  height: 36px;
+  object-fit: contain;
+}
+
+/* Mobile header */
+@media (max-width: 600px) {
+  .site-header {
+    min-height: 75px;
+  }
+
+  .site-header__container {
+    padding: 0 20px;
+  }
+
+  .site-header__logo {
+    width: 48px;
+    height: 48px;
+  }
+
+  .site-header__wordmark {
+    max-width: 150px;
+    height: 30px;
+  }
+}
