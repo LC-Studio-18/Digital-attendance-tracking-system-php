@@ -265,3 +265,48 @@
     padding: 16px;
   }
 }
+
+/* Greeting and user chip */
+.greeting__title {
+  font-size: 2rem;
+  margin: 0 0 4px;
+  color: var(--color-navy);
+}
+
+.greeting__sub {
+  margin: 0 0 24px;
+  color: var(--color-muted);
+}
+
+#user-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-chip__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-navy);
+  color: var(--color-lime);
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.user-chip__name {
+  font-weight: 600;
+}
+
+/* On small phones only the round avatar shows */
+@media (max-width: 480px) {
+  .greeting__title {
+    font-size: 1.5rem;
+  }
+
+  .user-chip__name {
+    display: none;
+  }
+}

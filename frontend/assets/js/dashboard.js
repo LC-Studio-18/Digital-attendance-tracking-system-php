@@ -137,6 +137,39 @@ function renderRecentRecords(records) {
   `;
 }
 
+// Greeting and top bar: "Good morning, Phelisa." plus the date and a user chip.
+// Inputs: fullName (text such as "Phelisa Fani"), today (a JavaScript Date)
+// Writes into: #greeting, #today-date, #user-chip
+function renderGreeting(fullName, today) {
+  const hour = today.getHours();
+  const part = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
+  const firstName = fullName.split(" ")[0];
+
+  // First letters of each name, e.g. "Phelisa Fani" becomes "PF"
+  const initials = fullName
+    .split(" ")
+    .map(function (word) { return word[0]; })
+    .join("")
+    .toUpperCase();
+
+  const dateText = today.toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+
+  document.getElementById("greeting").innerHTML = `
+    <h1 class="greeting__title">Good ${part}, ${firstName}.</h1>
+    <p class="greeting__sub">Here's your attendance overview.</p>
+  `;
+  document.getElementById("today-date").textContent = dateText;
+  document.getElementById("user-chip").innerHTML = `
+    <span class="user-chip__avatar">${initials}</span>
+    <span class="user-chip__name">${fullName}</span>
+  `;
+}
+
 // Dummy data for now. Imaan will replace these two lines with a call
 // that passes in the real values from GET /api/dashboard.
 renderStatusBadge("IN", "09:15 AM", "Today, 24 Mar 2025");
@@ -148,3 +181,5 @@ renderRecentRecords([
   { record_id: 3, clock_in: "2026-11-23 08:30:00", clock_out: "2026-11-23 16:30:00", hours: 8, is_corrected: true },
   { record_id: 2, clock_in: "2026-11-22 08:25:00", clock_out: "2026-11-22 16:30:00", hours: 8.08, is_corrected: false }
 ]);
+
+renderGreeting("Phelisa Fani", new Date());
