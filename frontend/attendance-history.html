@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Attendance History | LC Attends</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/attendance-history.css">
+</head>
+<body>
+<div class="page">
+  <p class="crumbs">Workspace / Attendance Log</p>
+  <p class="sub">Your Workspace's Attendance</p>
+
+  <div class="layout">
+    <div class="main">
+      <div class="head">
+        <h1>Attendance History</h1>
+        <div class="pills" id="pills">
+          <button type="button" data-status="onsite">Onsite &bull; <span id="cOnsite">0</span></button>
+          <button type="button" data-status="">All Staff &bull; <span id="cAll">0</span></button>
+          <button type="button" data-status="offsite">Offsite &bull; <span id="cOffsite">0</span></button>
+        </div>
+        <div class="range">
+          <button type="button" class="box" id="rangeBtn" aria-expanded="false" aria-controls="rangePanel">Date Range &#9662;</button>
+          <div id="rangePanel" hidden>
+            <label>From <input type="date" id="from"></label>
+            <label>To <input type="date" id="to"></label>
+            <button type="button" class="link" id="clearDates">Clear dates</button>
+          </div>
+        </div>
+      </div>
+
+      <form class="filters" id="filters" onsubmit="return false">
+        <input class="box" type="search" id="search" placeholder="Search by Name or Staff ID" aria-label="Search by name or staff ID">
+        <select class="box" id="department" aria-label="Department"><option value="">All Departments</option></select>
+        <select class="box" id="status" aria-label="Status">
+          <option value="">Status</option>
+          <option value="onsite">Onsite</option>
+          <option value="offsite">Offsite</option>
+          <option value="not_checked_in">Not Checked In</option>
+        </select>
+        <label class="box">In <input type="time" id="in" aria-label="Clocked in from"></label>
+        <label class="box">Out <input type="time" id="out" aria-label="Clocked out by"></label>
+      </form>
+
+      <section class="log" aria-label="Attendance records">
+        <ul id="records"></ul>
+        <p id="message" role="status" hidden></p>
+      </section>
+
+      <div class="under">
+        <!-- S2-18b: Export CSV. Zaarah and Wendy build the export; you add the error message and the double-click block. -->
+        <button type="button" class="btn" id="exportBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"/><path d="M12 10v7m-3-3l3 3 3-3"/></svg>
+          Download attendance records
+        </button>
+        <span class="legend"><i></i>Late</span>
+      </div>
+      <p id="exportError" role="alert" hidden></p>
+    </div>
+
+    <aside class="activity" aria-label="Recent activity">
+      <h2>Recent Activity</h2>
+      <div class="activity-sub"><span class="muted">Today's latest updates</span><span class="live"><i></i>Live</span></div>
+      <ul id="activity"></ul>
+    </aside>
+  </div>
+
+  <!-- Footer: built by a teammate, add it here when it is ready -->
+</div>
+<script src="assets/js/attendance-history.js"></script>
+</body>
+</html>
