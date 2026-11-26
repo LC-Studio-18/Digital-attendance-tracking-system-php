@@ -158,3 +158,5 @@ Content-Type: application/json
   the UI already accepts both shapes.
 - Confirm the timestamp format for `clock_in_utc` versus `clocked_in_at_utc`.
 - Decide where the login page should live so `UNAUTHORIZED` can offer a link.
+- S2-12B status contract is confirmed in `docs/s2-12b-status-contract.md`; the
+  refresh-event agreement and S2-08a store are still open.
