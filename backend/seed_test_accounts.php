@@ -1,6 +1,11 @@
 <?php
 
 require_once __DIR__. '/config/database.php';
+$pdo = $GLOBALS['pdo'] ?? null;
+
+if (!$pdo instanceof PDO) {
+  throw new RuntimeException('Database configuration did not provide a PDO connection.');
+}
 
 $accounts = [
   // active staff
