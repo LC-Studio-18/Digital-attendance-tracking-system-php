@@ -56,7 +56,50 @@ final class AttendanceModel
         ];
     }
 
-    
+
+
+/**
+ * Retrieves the employee's current active attendance record.
+ *
+ * Returns the active record if the employee is clocked in.
+ * Returns null if the employee has no active clock-in.
+ */
+
+/* This method returns the newest active record.
+ * Duplicate prevention is related to team ticket S2-10
+ * and should be coordinated with that work.
+*/
+
+public function getActiveSession(int $staffId): ?array
+{
+    // Find an attendance record that has not been closed.
+    $stmt = $this->pdo->prepare(
+        'SELECT record_id, staff_id, clock_in, clock_out
+         FROM attendance
+         WHERE staff_id = :staff_id
+         AND clock_out IS NULL
+         ORDER BY clock_in DESC
+         LIMIT 1'
+    );
+
+    $stmt->execute(['staff_id' => $staffId]);
+
+    $active = $stmt->fetch();
+
+    // No active attendance record was found.
+    if (!$active) {
+        return null;
+    }
+
+    // Return the employee's current attendance details.
+    return [
+        'record_id' => (int) $active['record_id'],
+        'staff_id'  => (int) $active['staff_id'],
+        'clock_in'  => $active['clock_in'],
+        'clock_out' => $active['clock_out'],
+    ];
+}
+   
 
     /**
      * Closes the user's active clock-in session: sets clock_out and duration_seconds.

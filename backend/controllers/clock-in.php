@@ -15,6 +15,18 @@ function respond(int $status, array $body): never
     exit;
 }
 
+// Clock-in only accepts POST requests.
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    respond(405, [
+        'success' => false,
+        'error' => [
+            'code' => 'METHOD_NOT_ALLOWED',
+            'message' => 'Only POST requests are allowed.'
+        ]
+    ]);
+}
+
+
 // TEMP STAND-IN (S2-05 / S2-06 not finished): replace with the shared "logged in" check.
 $staffId = (int) ($_SESSION['staff_id'] ?? 0);
 
@@ -46,3 +58,4 @@ if ($record === null) {
 }
 
 respond(201, ['success' => true, 'data' => $record]);
+

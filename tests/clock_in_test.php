@@ -28,3 +28,14 @@ if ($result === null) {
     echo "Clock-in successful!\n";
     print_r($result);
 }
+
+echo "\nTesting active session retrieval...\n";
+
+$activeSession = $model->getActiveSession($staffId);
+
+if ($activeSession !== null) {
+    echo "Active session found:\n";
+    print_r($activeSession);
+} else {
+    echo "No active session found.\n";
+}
