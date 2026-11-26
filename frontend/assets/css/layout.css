@@ -35,9 +35,8 @@
 
 .site-header__wordmark {
   display: block;
-  width: auto;
-  max-width: 180px;
-  height: 36px;
+  width: 180px;
+  height: auto;
   object-fit: contain;
 }
 
@@ -57,7 +56,7 @@
   }
 
   .site-header__wordmark {
-    max-width: 150px;
-    height: 30px;
+    width: 150px;
+    height: auto;
   }
 }
