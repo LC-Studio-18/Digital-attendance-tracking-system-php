@@ -20,6 +20,21 @@ if (!function_exists('sendJsonResponse')) {
         string $code,
         array $data = []
     ): void {
+        // Defence in depth: technical details must never reach an API response.
+        // Approved user-facing messages do not contain these markers; anything
+        // that does is logged internally and replaced with a generic message.
+        $technicalPattern = '/(SQLSTATE|PDOException|Exception:|stack\s*trace|password\s*=|passwd\s*=)/i';
+
+        if (preg_match($technicalPattern, $message) === 1) {
+            error_log(
+                'S2-13B: technical detail blocked from API response: '
+                . str_replace(["\r", "\n", "\0"], ' ', $message)
+            );
+            $message = $status === 'success'
+                ? 'Request processed successfully.'
+                : 'Unable to process your request right now. Please try again.';
+        }
+
         $payload = [
             'status'  => $status,
             'message' => $message,
@@ -90,19 +105,36 @@ if (!function_exists('sendIdempotencyResponse')) {
             'REQUEST_FAILED',
         ];
 
-        $code = isset($result['code']) && is_string($result['code']) && in_array($result['code'], $knownCodes, true)
-            ? $result['code']
+        $providedCode = isset($result['code']) && is_string($result['code']) ? $result['code'] : null;
+        $recognisedCode = $providedCode !== null && in_array($providedCode, $knownCodes, true);
+
+        $code = $recognisedCode
+            ? (string) $providedCode
             : ($ok ? 'REQUEST_SUCCESS' : 'REQUEST_FAILED');
 
-        $message = isset($result['message']) && is_string($result['message']) && $result['message'] !== ''
-            ? $result['message']
-            : ($ok ? 'Request processed successfully.' : 'Unable to process your request right now. Please try again.');
+        $genericSuccessMessage = 'Request processed successfully.';
+        $genericErrorMessage = 'Unable to process your request right now. Please try again.';
 
-        // An unknown code must never pass through an unverified service message.
-        if (!in_array($code, $knownCodes, true)) {
-            $message = $ok
-                ? 'Request processed successfully.'
-                : 'Unable to process your request right now. Please try again.';
+        // Only a message tied to a recognised code is trusted as user-facing.
+        $message = $recognisedCode
+            && isset($result['message'])
+            && is_string($result['message'])
+            && $result['message'] !== ''
+                ? $result['message']
+                : ($ok ? $genericSuccessMessage : $genericErrorMessage);
+
+        if (!$recognisedCode) {
+            // Keep the rejected detail in the internal log; never return it.
+            $loggedCode = $providedCode ?? '(none)';
+            $loggedMessage = isset($result['message']) && is_string($result['message'])
+                ? $result['message']
+                : '(none)';
+
+            error_log(
+                'S2-13B: unrecognised idempotency result; generic response used. code='
+                . str_replace(["\r", "\n", "\0"], ' ', $loggedCode)
+                . ' message=' . str_replace(["\r", "\n", "\0"], ' ', $loggedMessage)
+            );
         }
 
         if ($ok) {
