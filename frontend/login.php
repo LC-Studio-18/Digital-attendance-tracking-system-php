@@ -1,9 +1,14 @@
 <?php
-// Generic backend error hook (wired with Caleb/Lisekho once session auth is ready)
-// e.g. $loginError = $_SESSION['login_error'] ?? ''; unset($_SESSION['login_error']);
-$loginError = isset($loginError) ? (string) $loginError : '';
-$oldEmail = isset($oldEmail) ? (string) $oldEmail : '';
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
+
+$loginError = isset($_SESSION['login_error']) ? (string) $_SESSION['login_error'] : '';
+$oldEmail = isset($_SESSION['old_email']) ? (string) $_SESSION['old_email'] : '';
+
+unset($_SESSION['login_error'], $_SESSION['old_email']);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -56,7 +61,7 @@ $oldEmail = isset($oldEmail) ? (string) $oldEmail : '';
       </div>
 
       <!-- Confirm exact POST target path with Lisekho (e.g. ../backend/auth/login.php) -->
-      <form id="loginForm" action="" method="post" novalidate>
+      <form id="loginForm" action="../backend/login.php" method="post" novalidate>
         <div class="login-field">
           <label for="email" class="login-label--email">Email address</label>
           <div class="login-input-wrap">
