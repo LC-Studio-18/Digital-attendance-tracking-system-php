@@ -333,6 +333,11 @@ body.edit-time-page {
     color: var(--edit-time-navy);
 }
 
+.edit-time-modal__button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
 @media (max-width: 600px) {
     body.edit-time-page {
         padding: 20px 12px;
