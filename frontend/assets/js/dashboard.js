@@ -424,7 +424,7 @@ renderWeekSummary(5, 5);
 
 renderRecentRecords([
   { record_id: 4, clock_in: "2026-11-24 09:15:00", clock_out: null, hours: null, is_corrected: false, status: "Late" },
-  { record_id: 3, clock_in: "2026-11-23 08:30:00", clock_out: "2026-11-23 16:30:00", hours: 8, is_corrected: true, status: "Present" },
+  { record_id: 3, clock_in: "2026-11-23 08:30:00", clock_out: "2026-11-23 16:30:00", hours: 8, is_corrected: false, status: "Present" },
   { record_id: 2, clock_in: "2026-11-22 08:25:00", clock_out: "2026-11-22 16:30:00", hours: 8.08, is_corrected: false, status: "Present" },
   { record_id: 1, clock_in: "2026-11-21 09:10:00", clock_out: "2026-11-21 16:30:00", hours: 7.33, is_corrected: false, status: "Late" }
 ]);

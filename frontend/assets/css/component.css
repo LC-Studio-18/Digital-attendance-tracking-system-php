@@ -828,3 +828,11 @@
     r: 5;
   }
 }
+
+/* Small phones: keep the date under the clock-in time on one line */
+@media (max-width: 480px) {
+  .status-card__date {
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+}
