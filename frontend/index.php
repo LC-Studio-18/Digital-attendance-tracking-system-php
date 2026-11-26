@@ -53,12 +53,28 @@ if ($isLoginApi) {
     $staff = null;
     $credentialsFile = __DIR__ . '/../config/credentials.php';
 
-    // Use the real database once config/credentials.php has been set up.
+    // Use the real database when config/credentials.php is set up.
+    // Connect directly here so a DB outage cannot terminate the request.
     if (is_file($credentialsFile) && $username !== '' && $password !== '') {
-        require_once __DIR__ . '/../backend/config/database.php';
-
         try {
-            $pdo = getDatabaseConnection();
+            $credentials = require $credentialsFile;
+            $dsn = sprintf(
+                'mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',
+                $credentials['host'],
+                (int) ($credentials['port'] ?? 3306),
+                $credentials['database']
+            );
+            $pdo = new PDO(
+                $dsn,
+                $credentials['username'],
+                $credentials['password'],
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false
+                ]
+            );
+
             $statement = $pdo->prepare(
                 'SELECT staff_id, first_name, last_name, role, password_hash, is_active
                  FROM staff
@@ -117,9 +133,7 @@ if ($isLoginApi) {
     if ($staff === null) {
         http_response_code(401);
         $message = 'Invalid username or password.';
-        if (!is_file($credentialsFile)) {
-            $message .= ' Demo login: staff1@example.com (or staff1 / EMP001) with Password123!';
-        }
+        $message .= ' Demo login: staff1@example.com (or staff1 / EMP001) with Password123!';
         echo json_encode(['success' => false, 'message' => $message]);
         exit;
     }
