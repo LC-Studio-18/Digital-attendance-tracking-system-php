@@ -836,3 +836,48 @@
     white-space: nowrap;
   }
 }
+
+/* ---------- Final touches to match the Figma ---------- */
+
+/* Small lime dot on the bell */
+.user-chip__bell {
+  position: relative;
+}
+
+.user-chip__bell::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-lime);
+}
+
+/* Logo text in lime */
+.sidebar__logo,
+.footer__logo {
+  color: var(--color-lime);
+}
+
+/* Chart area a little darker */
+.chart__area {
+  fill-opacity: 0.5;
+}
+
+/* Bigger sidebar text on larger screens only, so the phone top bar stays compact */
+@media (min-width: 769px) {
+  .sidebar__link {
+    font-size: 1.05rem;
+  }
+
+  .sidebar__access-pill {
+    padding: 6px 16px;
+    font-size: 1rem;
+  }
+
+  .sidebar__access-role {
+    font-size: 1.25rem;
+  }
+}
