@@ -11,7 +11,7 @@ class Staff
 
   public function findByEmail(string $email): ?array
   {
-    $sql = "SELECT id, email, password_hash, role, is_active FROM staff WHERE email = :email LIMIT 1";
+    $sql = "SELECT staff_id, email, password_hash, role, is_active FROM staff WHERE email = :email LIMIT 1";
 
     $stmt = $this->pdo->prepare($sql);
     $stmt -> execute([':email' => $email]);
