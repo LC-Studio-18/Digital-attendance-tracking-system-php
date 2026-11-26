@@ -69,21 +69,52 @@ $hasActiveSession = static function (int $userId) use ($pdo): bool {
 };
 
 $createAttendance = static function (array $payload) use ($pdo): array {
-    $stmt = $pdo->prepare(
-        'INSERT INTO attendance (staff_id, site_id, qr_code_id, method, clock_in, clock_out)
-         VALUES (:staff_id, :site_id, :qr_code_id, :method, :clock_in, NULL)'
-    );
-    $stmt->execute([
-        ':staff_id' => $payload['user_id'],
-        ':site_id' => $payload['site_id'],
-        ':qr_code_id' => $payload['qr_code_id'],
-        ':method' => $payload['method'],
-        ':clock_in' => $payload['clocked_in_at_utc'],
-    ]);
+    $startedTx = !$pdo->inTransaction();
+    if ($startedTx) {
+        $pdo->beginTransaction();
+    }
 
-    return [
-        'record_id' => (int) $pdo->lastInsertId(),
-    ];
+    try {
+        $lockStmt = $pdo->prepare(
+            'SELECT record_id
+             FROM attendance
+             WHERE staff_id = :staff_id AND clock_out IS NULL
+             LIMIT 1
+             FOR UPDATE'
+        );
+        $lockStmt->execute([':staff_id' => $payload['user_id']]);
+        if ($lockStmt->fetch(PDO::FETCH_ASSOC) !== false) {
+            if ($startedTx && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            return ['_duplicate' => true];
+        }
+
+        $stmt = $pdo->prepare(
+            'INSERT INTO attendance (staff_id, site_id, qr_code_id, method, clock_in, clock_out)
+             VALUES (:staff_id, :site_id, :qr_code_id, :method, :clock_in, NULL)'
+        );
+        $stmt->execute([
+            ':staff_id' => $payload['user_id'],
+            ':site_id' => $payload['site_id'],
+            ':qr_code_id' => $payload['qr_code_id'],
+            ':method' => $payload['method'],
+            ':clock_in' => $payload['clocked_in_at_utc'],
+        ]);
+
+        $recordId = (int) $pdo->lastInsertId();
+
+        if ($startedTx && $pdo->inTransaction()) {
+            $pdo->commit();
+        }
+
+        return ['record_id' => $recordId];
+    } catch (Throwable $e) {
+        if ($startedTx && $pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
 };
 
 $result = processQrClockIn(
@@ -93,6 +124,21 @@ $result = processQrClockIn(
     $hasActiveSession,
     $createAttendance
 );
+
+if (
+    $result['status'] === 201
+    && isset($result['body']['data']['_duplicate'])
+    && $result['body']['data']['_duplicate'] === true
+) {
+    $result = [
+        'status' => 409,
+        'body' => [
+            'ok' => false,
+            'code' => 'ALREADY_CLOCKED_IN',
+            'message' => 'User already has an active attendance session.',
+        ],
+    ];
+}
 
 http_response_code($result['status']);
 echo json_encode($result['body']);
