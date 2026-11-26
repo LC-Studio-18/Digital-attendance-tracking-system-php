@@ -34,19 +34,21 @@ function renderStatusBadge(status, clockedInAt, dateText) {
 
 // Hours summary: two cards, one for today and one for this week.
 // Input: hours, an object like { today: 4.5, week: 22.25 }
+//        (the values can also be text such as "4.50")
 // Writes into: <section id="hours-summary">
 function renderHoursSummary(hours) {
   const el = document.getElementById("hours-summary");
 
-  // toFixed(2) always shows two decimals, for example 4.50
+  // Number() converts text to a number, and toFixed(2) always shows
+  // two decimals, for example 4.50
   el.innerHTML = `
     <div class="hours-card">
       <span class="hours-card__label">Today</span>
-      <span class="hours-card__value">${hours.today.toFixed(2)} h</span>
+      <span class="hours-card__value">${Number(hours.today).toFixed(2)} h</span>
     </div>
     <div class="hours-card">
       <span class="hours-card__label">This week</span>
-      <span class="hours-card__value">${hours.week.toFixed(2)} h</span>
+      <span class="hours-card__value">${Number(hours.week).toFixed(2)} h</span>
     </div>
   `;
 }
@@ -89,6 +91,7 @@ function formatRecordTime(dateTime) {
 // Input: records, an array like
 //   [{ record_id: 4, clock_in: "2026-11-25 08:00:00", clock_out: null,
 //      hours: null, is_corrected: false }]
+// hours can be a number or text, and is_corrected can be true/false or 0/1.
 // Writes into: <section id="recent-records">
 function renderRecentRecords(records) {
   const el = document.getElementById("recent-records");
@@ -106,13 +109,18 @@ function renderRecentRecords(records) {
   const rows = records.map(function (record) {
     // An open shift has no clock-out and no hours yet
     const clockOut = record.clock_out ? formatRecordTime(record.clock_out) : "Still in";
-    const hours = record.hours !== null ? record.hours.toFixed(2) + " h" : "--";
-    const tag = record.is_corrected
+
+    // The database may send hours as text ("8.42") and is_corrected as 0 or 1,
+    // so convert them before using them
+    const hasHours = record.hours !== null && record.hours !== undefined;
+    const hours = hasHours ? Number(record.hours).toFixed(2) + " h" : "--";
+    const isCorrected = Number(record.is_corrected) === 1;
+    const tag = isCorrected
       ? '<span class="record__tag">Corrected</span>'
       : "";
 
     return `
-      <li class="record ${record.is_corrected ? "record--corrected" : ""}">
+      <li class="record ${isCorrected ? "record--corrected" : ""}">
         <div class="record__date">${formatRecordDate(record.clock_in)} ${tag}</div>
         <div class="record__times">
           <span>In: ${formatRecordTime(record.clock_in)}</span>
