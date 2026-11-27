@@ -116,8 +116,10 @@ unset($_SESSION['login_error'], $_SESSION['old_email']);
           <label class="login-remember">
             <input type="checkbox" name="remember" value="1" />
             <span>Remember me</span>
-          </label>
-          <a href="#" class="login-forgot-link">Forgot password?</a>
+          </label> 
+          <div class="auth-actions">
+          <a href="./forgot-password.php" class="auth-forgot-link">Forgot password?</a>
+        </div>
         </div>
 
         <button type="submit" id="loginSubmitBtn" class="login-submit">
