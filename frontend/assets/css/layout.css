@@ -293,3 +293,12 @@
     overflow-y: auto;
   }
 }
+
+/* ---------- Medium windows: stack the paired cards so nothing gets squeezed ---------- */
+@media (max-width: 1200px) {
+  .pf-row--status,
+  .pf-row--overview,
+  .pf-row--history {
+    grid-template-columns: 1fr;
+  }
+}
