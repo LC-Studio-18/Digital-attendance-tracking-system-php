@@ -14,14 +14,16 @@ $clockSuffix = $failClock ? '&force=fail' : '';
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Badge test harness</title>
+  <link rel="icon" type="image/png" href="../assets/img/lc-favicon.png">
+  <link rel="stylesheet" href="../assets/css/status-card.css">
   <link rel="stylesheet" href="../assets/css/status-badge.css">
   <script src="../assets/js/status-api.js" defer></script>
   <script src="../assets/js/status-badge.js" defer></script>
-  <style>body{font-family:system-ui,sans-serif;max-width:40rem;margin:1rem auto;padding:0 1rem}button{font:inherit;padding:.5rem 1rem;margin-right:.5rem}</style>
+  <style>button{font:inherit;padding:.5rem 1rem;margin-right:.5rem}</style>
 </head>
-<body>
+<body class="attends"><main class="attends__main">
   <h1>Badge test harness</h1>
-  <p>Status: <?php render_status_badge(['endpoint' => $statusUrl]); ?></p>
+  <div class="status-card"><?php render_status_badge(['endpoint' => $statusUrl, 'show_detail' => true]); ?></div>
   <p>
     <button id="in">Clock in</button>
     <button id="out">Clock out</button>
@@ -50,5 +52,5 @@ $clockSuffix = $failClock ? '&force=fail' : '';
     document.getElementById('in').onclick = function () { clock('in'); };
     document.getElementById('out').onclick = function () { clock('out'); };
   </script>
-</body>
+</main></body>
 </html>

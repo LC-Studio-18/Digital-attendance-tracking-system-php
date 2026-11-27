@@ -1,13 +1,16 @@
 /* status-badge.css (S2-12A)
-   Colours are WCAG AA checked (see README). Sizes/spacing are placeholders until
-   checked against the Figma design and the S2-04 shared styles. */
+   Palette from "LC Attends - Login Page Developer Reference": ink #0E181F, white #FFFFFF,
+   lime #B2ED1D, teal #2F6B75, error red #D93025. Font: Inter.
+   Pill shape follows the Figma (rounded rectangle, radius 7 as used for buttons).
+   Contrast (calculated): IN 12.85:1, OUT 17.96:1, Checking... 6.03:1, Status unavailable 17.96:1 (text/background). */
 
-.status-badge-wrap { display: inline-block; max-width: 100%; vertical-align: middle; }
+.status-badge-wrap { position: relative; display: inline-block; max-width: 100%; vertical-align: middle; }
 
 .status-badge {
-  --sb-bg: #eceff3;
-  --sb-fg: #1f2937;
-  --sb-border: #475569;
+  --sb-bg: #FFFFFF;
+  --sb-fg: #0E181F;
+  --sb-border: #0E181F;
+  --sb-icon: #0E181F;
 
   display: inline-flex;
   align-items: center;
@@ -15,45 +18,43 @@
   box-sizing: border-box;
   max-width: 100%;
   min-height: 2.25rem;
-  padding: 0.375rem 0.875rem;
-  border: 2px dashed var(--sb-border);
-  border-radius: 999px;
+  padding: 0.375rem 1rem;
+  border: 2px solid var(--sb-border);
+  border-radius: 7px;
   background: var(--sb-bg);
   color: var(--sb-fg);
-  font-family: inherit;
-  font-size: 1rem;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 0.9375rem; /* 15px */
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: 0.02em;
   overflow-wrap: anywhere;
 }
 
-.status-badge__icon { display: inline-flex; flex: 0 0 auto; }
+.status-badge__icon { display: inline-flex; flex: 0 0 auto; color: var(--sb-icon); }
 .status-badge__icon svg { display: block; }
 
-/* IN: dark fill, white text, solid border, filled tick icon */
+/* IN: lime fill, ink text, filled tick icon (matches Figma) */
 .status-badge[data-state="IN"] {
-  --sb-bg: #14532d; --sb-fg: #ffffff; --sb-border: #14532d;
-  border-style: solid;
+  --sb-bg: #B2ED1D; --sb-fg: #0E181F; --sb-border: #B2ED1D; --sb-icon: #0E181F;
 }
 
-/* OUT: white fill, dark text, thick solid border, hollow minus icon */
+/* OUT: white fill, ink text, ink border, hollow minus icon */
 .status-badge[data-state="OUT"] {
-  --sb-bg: #ffffff; --sb-fg: #7f1d1d; --sb-border: #7f1d1d;
-  border-style: solid;
-  border-width: 3px;
+  --sb-bg: #FFFFFF; --sb-fg: #0E181F; --sb-border: #0E181F; --sb-icon: #0E181F;
 }
 
-/* Checking...: light grey, dashed border, spinner icon */
+/* Checking...: teal fill, white text, dashed white border, spinner icon */
 .status-badge[data-state="loading"] {
-  --sb-bg: #eceff3; --sb-fg: #1f2937; --sb-border: #475569;
+  --sb-bg: #2F6B75; --sb-fg: #FFFFFF; --sb-border: #FFFFFF; --sb-icon: #FFFFFF;
   border-style: dashed;
 }
 
-/* Status unavailable: pale amber, dotted border, warning triangle icon */
+/* Status unavailable: white fill, ink text, dotted red border, red warning triangle */
 .status-badge[data-state="unavailable"] {
-  --sb-bg: #fff4cc; --sb-fg: #5c3a00; --sb-border: #7a4b00;
+  --sb-bg: #FFFFFF; --sb-fg: #0E181F; --sb-border: #D93025; --sb-icon: #D93025;
   border-style: dotted;
+  border-width: 3px;
 }
 
 .status-badge[data-state="loading"] .status-badge__icon svg { animation: sb-spin 1s linear infinite; }
@@ -61,6 +62,20 @@
 @media (prefers-reduced-motion: reduce) {
   .status-badge[data-state="loading"] .status-badge__icon svg { animation: none; }
 }
+
+/* Optional supporting text under the badge. Colour is inherited from the surrounding card. */
+.status-badge-wrap--detail {
+  display: flex; flex-direction: column; align-items: center; gap: 0.625rem; text-align: center;
+}
+.status-badge__detail {
+  display: flex; flex-direction: column; gap: 0.25rem;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 0.8125rem; /* 13px */
+  line-height: 1.4;
+}
+.status-badge__detail[hidden], .status-badge__since[hidden] { display: none; }
+.status-badge__detail-text { font-weight: 700; }
+.status-badge__since { font-weight: 400; }
 
 /* Screen-reader-only text (prefix + live region) */
 .status-badge__sr,

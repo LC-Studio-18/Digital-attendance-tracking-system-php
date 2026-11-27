@@ -15,7 +15,10 @@
   var CONTRACT = {
     statusField: 'status', // TO CONFIRM: JSON field holding the status
     inValue: 'IN',         // TO CONFIRM
-    outValue: 'OUT'        // TO CONFIRM
+    outValue: 'OUT',       // TO CONFIRM
+    sinceField: 'since'    // TO CONFIRM (optional): time of the user's last clock action.
+                           // Accepts "HH:MM" or an ISO 8601 timestamp. If absent/unusable, the
+                           // "Since" line is simply not shown (a time is never invented).
   };
   var TIMEOUT_MS = 8000;
   var CLOCK_SUCCESS_EVENT = 'attendance:clock-success';
@@ -32,6 +35,19 @@
     if (value === CONTRACT.inValue) return 'IN';
     if (value === CONTRACT.outValue) return 'OUT';
     return null;
+  }
+
+  function pad(n) { n = String(n); return n.length < 2 ? '0' + n : n; }
+
+  // "08:30", "8:30:15" or an ISO timestamp -> "08:30" (browser local time). Anything else -> null.
+  function formatSince(value) {
+    if (typeof value !== 'string' || !value.trim()) return null;
+    var text = value.trim();
+    var m = /^(\d{1,2}):(\d{2})(:\d{2})?$/.exec(text);
+    if (m) return pad(m[1]) + ':' + m[2];
+    var d = new Date(text);
+    if (isNaN(d.getTime())) return null;
+    return pad(d.getHours()) + ':' + pad(d.getMinutes());
   }
 
   function createStore(endpoint) {
@@ -70,7 +86,7 @@
           if (mySeq !== seq) return; // superseded by a newer request
           var status = parseStatus(json);
           if (!status) throw new Error('Unusable status data');
-          emit({ status: status });
+          emit({ status: status, since: formatSince(json[CONTRACT.sinceField]) });
         })
         .catch(function (err) {
           if (mySeq !== seq) return;
@@ -109,6 +125,7 @@
   global.StatusApi = {
     getStore: getStore,
     parseStatus: parseStatus,
+    formatSince: formatSince,
     CLOCK_SUCCESS_EVENT: CLOCK_SUCCESS_EVENT,
     configure: function (opts) { Object.assign(options, opts || {}); }
   };

@@ -19,6 +19,12 @@
     unavailable: 'Attendance status is unavailable.'
   };
 
+  // Supporting line under the badge (only rendered when show_detail is set in the PHP partial).
+  var DETAIL = {
+    IN: 'You are currently Clocked In',
+    OUT: 'You are currently Clocked Out'
+  };
+
   // Each state has its own shape, so state is never colour-only.
   var SVG = '<svg viewBox="0 0 20 20" width="20" height="20" focusable="false" aria-hidden="true">';
   var ICONS = {
@@ -46,7 +52,21 @@
     var labelEl = el.querySelector('.status-badge__label');
     var wrap = el.closest('.status-badge-wrap');
     var liveEl = wrap ? wrap.querySelector('.status-badge__live') : null;
+    var detailEl = wrap ? wrap.querySelector('.status-badge__detail') : null;
+    var detailTextEl = detailEl ? detailEl.querySelector('.status-badge__detail-text') : null;
+    var sinceEl = detailEl ? detailEl.querySelector('.status-badge__since') : null;
     var lastResolved = null;
+
+    // Shows "You are currently Clocked In" + "Since 08:30" only for a confirmed status.
+    // The time is shown only when the backend supplied one.
+    function showDetail(status, since) {
+      if (!detailEl) return;
+      if (!DETAIL[status]) { detailEl.hidden = true; return; }
+      detailTextEl.textContent = DETAIL[status];
+      if (since) { sinceEl.textContent = 'Since ' + since; sinceEl.hidden = false; }
+      else { sinceEl.textContent = ''; sinceEl.hidden = true; }
+      detailEl.hidden = false;
+    }
 
     function apply(status) {
       el.setAttribute('data-state', status);
@@ -66,6 +86,7 @@
     if (!endpoint) {
       console.warn('[status-badge] No endpoint set. Showing "Status unavailable".');
       apply('unavailable');
+      showDetail('unavailable');
       feedback.onError(el, 'No endpoint configured');
       return;
     }
@@ -73,6 +94,7 @@
     apply('loading');
     global.StatusApi.getStore(endpoint).subscribe(function (state) {
       apply(state.status);
+      showDetail(state.status, state.since);
       if (state.status === 'loading') {
         feedback.onLoading(el);
         return;
