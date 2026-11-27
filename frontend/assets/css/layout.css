@@ -181,7 +181,7 @@
 /* Row 1: status card (a little wider) beside the Clocked Out card */
 .pf-row--status {
   display: grid;
-  grid-template-columns: 1.28fr 1fr;
+  grid-template-columns: 1.16fr 1fr;
   gap: 24px;
 }
 
@@ -195,7 +195,7 @@
 .pf-row--overview,
 .pf-row--history {
   display: grid;
-  grid-template-columns: 2.7fr 1fr;
+  grid-template-columns: 2.3fr 1fr;
   gap: 24px;
 }
 

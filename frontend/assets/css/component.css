@@ -881,3 +881,47 @@
     font-size: 1.25rem;
   }
 }
+
+/* ---------- Match the Figma exactly: status card and Clocked Out card ---------- */
+
+/* Status card: the status part takes the free space, and the time part sits on the right
+   after the thin line, so there is no empty green gap */
+.pf-status-card__main {
+  flex: 1;
+}
+
+.pf-status-card__time {
+  flex: 0 0 42%;
+  padding-left: 24px;
+}
+
+/* Clocked Out: a grey card on top, and the Last updated box as its own strip underneath */
+.pf-clocked-out-card {
+  padding: 0;
+  gap: 6px;
+  background: transparent;
+}
+
+.pf-clocked-out-card__top {
+  flex: 1;
+  padding: 20px 24px;
+  border-radius: var(--radius-card);
+  background: var(--color-out-bg);
+}
+
+@media (max-width: 480px) {
+  .pf-clocked-out-card__top {
+    padding: 16px;
+  }
+}
+
+/* Wide screens: the status card text grows a little with the window, like the Figma */
+@media (min-width: 1201px) {
+  .pf-status-card__value {
+    font-size: clamp(2.5rem, 3vw, 3.5rem);
+  }
+
+  .pf-status-card__value--time {
+    font-size: clamp(1.75rem, 2vw, 2.4rem);
+  }
+}
