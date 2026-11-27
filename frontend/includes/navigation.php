@@ -5,12 +5,14 @@
  *
  * Optional profile fields:
  * initials, name, access_label, user_role, organisation, status
+ * Missing values fall back to placeholders (AM / EP, Admin Name /
+ * Employee Name, Location). The active item defaults to dashboard.
  */
 
 $navigationConfig = $navigationConfig ?? [];
 
 $role = $navigationConfig['role'] ?? '';
-$activePage = $navigationConfig['active'] ?? '';
+$activePage = $navigationConfig['active'] ?? 'dashboard';
 $links = $navigationConfig['links'] ?? [];
 $profile = $navigationConfig['profile'] ?? [];
 
@@ -54,13 +56,14 @@ foreach ($navigationItems[$role] as $key => $label) {
   }
 }
 
-$initials = $profile['initials'] ?? '';
-$name = $profile['name'] ?? '';
+// Placeholder profile details until real login data is passed in.
+$initials = $profile['initials'] ?? ($role === 'admin' ? 'AM' : 'EP');
+$name = $profile['name'] ?? ($role === 'admin' ? 'Admin Name' : 'Employee Name');
 $accessLabel = $profile['access_label'] ?? (
   $role === 'admin' ? 'Admin Access' : 'Employee Access'
 );
 $userRole = $profile['user_role'] ?? ucfirst($role);
-$organisation = $profile['organisation'] ?? '';
+$organisation = $profile['organisation'] ?? 'Location';
 $status = $profile['status'] ?? 'Live';
 
 ?>
