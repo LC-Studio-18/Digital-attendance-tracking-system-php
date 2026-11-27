@@ -17,3 +17,13 @@ storage/logs/*
 .DS_Store
 Thumbs.db
 **/credentials.php
+backend/includes/LoginController.php
+backend/includes/Staff.php
+backend/includes/session.php
+backend/config/database.php
+backend/login.php
+backend/logout.php
+backend/seed_test_accounts.php
+database/create_app_user.sql
+database/schema.sql
+database/seed.sql
