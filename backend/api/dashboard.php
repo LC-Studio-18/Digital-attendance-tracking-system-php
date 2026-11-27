@@ -10,7 +10,7 @@ require_once __DIR__ . '/../config/database.php';
 
 // ⚠️ CHANGE #1: swap to Vuvu's real file when it arrives
 // (this filename currently holds the stand-in queries)
-require_once __DIR__ . '/../includes/dashboard-quesries.php';
+require_once __DIR__ . '/../includes/dashboard-queries.php';
 require_once __DIR__ . '/../includes/session.php';
 
 // ⚠️ CHANGE #2: confirm the late cutoff with the team
