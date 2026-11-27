@@ -102,6 +102,6 @@ Always `{ "error": "message" }`, never raw PHP output.
 
 ## Notes on calculations (pending Vuvu's confirmation)
 
-- `hours.today` and `hours.week`: whether the running time of an open shift is included is TBC with Vuvu.
-- Shifts crossing midnight: counting rule TBC with Vuvu.
-- Week start day: TBC with Vuvu.
+- `hours.today` and `hours.week`: whether the running time of an open shift is included is TBC with V.
+- Shifts crossing midnight: counting rule TBC with V.
+- Week start day: TBC with V.
