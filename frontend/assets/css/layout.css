@@ -282,3 +282,14 @@
     height: 18px;
   }
 }
+
+/* ---------- Desktop: the sidebar stays in place while the page scrolls ---------- */
+@media (min-width: 769px) {
+  .pf-sidebar {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    overflow-y: auto;
+  }
+}
