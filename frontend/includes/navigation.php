@@ -118,6 +118,21 @@ $status = $profile['status'] ?? 'Live';
 
       </section>
 
+      <!-- Mobile Add Employee: admin only -->
+      <?php if ($role === 'admin' && !empty($links['add_employee'])): ?>
+        <a
+          href="<?php echo $escapeNavigation($links['add_employee']); ?>"
+          class="sidebar__link sidebar__link--add_employee">
+
+          <span
+            class="navigation-icon navigation-icon--document"
+            aria-hidden="true">🗎</span>
+
+          <span class="sidebar__label">Add Employee</span>
+
+        </a>
+      <?php endif; ?>
+
       <section class="sidebar__user-card">
 
         <span class="sidebar__user-initials">
