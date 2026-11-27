@@ -3,30 +3,31 @@
 ## Information
 - Parent ticket: S2-05 - Login and Logout with PHP Sessions
 - Assigned developer: Lisekho
-- QA status: Not Run
-- Build / commit SHA:
+- QA status: Pass (MySQL integration retested)
+- Build / commit SHA: `f16502f` (`backend1`)
 - Figma design / version tested: [Open Figma design](https://www.figma.com/design/Tlkxebvj6tGK2rqH57wFXN/S1-08?node-id=0-1&t=0aqGnI5ErYzrNuwV-1) - version:
-- Test environment:
+- Test environment: Windows/XAMPP; PHP 8.0.30; dedicated MySQL database `attendance_test_db`.
 
 ## Objective
 - Look up a staff member by email using a PDO prepared statement and verify the account is active.
 
 ## Acceptance Criteria
-- [ ] Email lookup uses a PDO prepared statement.
-- [ ] Existing active accounts can be distinguished internally from missing or inactive accounts.
-- [ ] Missing and deactivated accounts are not authenticated.
+- [x] Email lookup uses a PDO prepared statement.
+- [x] Existing active accounts can be distinguished internally from missing or inactive accounts.
+- [x] Missing and deactivated accounts are not authenticated.
 
 ## Test Cases
 
 | Test ID | Scenario | Expected result | Actual result | Status | Evidence / bug |
 |---|---|---|---|---|---|
-| TC-01 | Look up active, unknown, and deactivated account emails | Only the active existing account is eligible to continue authentication | | Not Run | |
+| TC-01 | Look up active, unknown, and deactivated account emails | Only the active existing account is eligible to continue authentication | MySQL-backed prepared lookups authenticated active staff/admin accounts and rejected unknown, inactive, and SQL-shaped email inputs. | Pass | MySQL fixture test passed; QA fixtures were provisioned separately because BUG-010 remains open. |
 
 ## Test History
 
 | Date | Tester | Test / retest / regression | Version tested | Result | Notes |
 |---|---|---|---|---|---|
-| | | | | Not Run | |
+| 2026-11-26 | QA | backend test | `f16502f` | Pass | Prepared lookup and account eligibility verified with isolated PDO fixtures. |
+| 2026-11-26 | QA | MySQL retest | `f16502f` + MySQL QA fixtures | Pass | Prepared lookup and active-account eligibility verified against MySQL test fixtures. |
 
 ## Linked Bugs
-None recorded.
+BUG-010 - Test-account seeder/schema mismatch; remains open.

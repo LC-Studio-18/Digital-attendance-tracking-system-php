@@ -3,10 +3,10 @@
 ## Information
 - Parent ticket: S2-06 - Staff and Admin Role Permissions
 - Assigned developer: Avela Gxotiwe (coordinate wording with Frontend)
-- QA status: Not Run
-- Build / commit SHA:
+- QA status: Blocked - message verified in guard; no admin page to verify user-facing display
+- Build / commit SHA: `2b44dcb` (PR head; merged into `backend1` at `7d5e232`)
 - Figma design / version tested: Not Applicable
-- Test environment:
+- Test environment: Windows/XAMPP; PHP 8.0.30; direct `requireAdmin()` invocation.
 
 ## Objective
 - Provide a clear access-denied message to staff who try to open an admin page and agree on its wording with Frontend.
@@ -20,13 +20,13 @@
 
 | Test ID | Scenario | Expected result | Actual result | Status | Evidence / bug |
 |---|---|---|---|---|---|
-| TC-01 | Open an admin page as a staff user | Agreed access-denied message is shown and no protected data or action is exposed | | Not Run | |
+| TC-01 | Open an admin page as a staff user | Agreed access-denied message is shown and no protected data or action is exposed | Direct CLI invocation of `requireAdmin()` set response code 403 and emitted `Access denied. You do not have permission to access this page.` for staff. No admin page exists to verify rendered display or protected-data handling. | Blocked | Guard message verified; Frontend display and route behavior remain unverified. |
 
 ## Test History
 
 | Date | Tester | Test / retest / regression | Version tested | Result | Notes |
 |---|---|---|---|---|---|
-| | | | | Not Run | |
+| 2026-11-27 | QA | backend retest | `2b44dcb` | Blocked | Guard sets response code 403 and emits the agreed text; no admin page is available for end-to-end verification. |
 
 ## Linked Bugs
 None recorded.

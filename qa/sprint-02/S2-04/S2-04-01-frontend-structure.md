@@ -3,10 +3,10 @@
 ## Information
 - Parent ticket: S2-04 - Shared Layout and Login Page
 - Assigned developer: Nithaam (Avela supports)
-- QA status: Not Run
-- Build / commit SHA:
+- QA status: Passed - structure and reusable includes rendered in isolation
+- Build / commit SHA: `2ae8032` (`origin/team1`)
 - Figma design / version tested: [Open Figma design](https://www.figma.com/design/Tlkxebvj6tGK2rqH57wFXN/S1-08?node-id=0-1&t=0aqGnI5ErYzrNuwV-1) - version:
-- Test environment:
+- Test environment: Windows/XAMPP; PHP 8.0.30; isolated `team1` worktree and local PHP server.
 
 ## Objective
 - Establish the frontend folders and base files, including PHP include support for the shared layout.
@@ -20,13 +20,13 @@
 
 | Test ID | Scenario | Expected result | Actual result | Status | Evidence / bug |
 |---|---|---|---|---|---|
-| TC-01 | Load pages using the agreed frontend structure | Base files and PHP includes resolve without missing-file errors | | Not Run | |
+| TC-01 | Load pages using the agreed frontend structure | Base files and PHP includes resolve without missing-file errors | Login page and temporary include fixture returned HTTP 200. PHP syntax checks passed for the login page, header, navigation, and footer includes; assets loaded without missing-file errors. No current application page calls the shared includes. | Passed | Tested against `origin/team1` commit `2ae8032`; fixture was isolated and removed after testing. |
 
 ## Test History
 
 | Date | Tester | Test / retest / regression | Version tested | Result | Notes |
 |---|---|---|---|---|---|
-| | | | | Not Run | |
+| 2026-11-27 | QA | frontend retest | `2ae8032` (`origin/team1`) | Passed | PHP page structure and shared includes loaded in the isolated browser fixture. |
 
 ## Linked Bugs
 None recorded.

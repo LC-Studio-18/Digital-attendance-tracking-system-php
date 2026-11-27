@@ -5,7 +5,7 @@ Digital Attendance Tracking System
 
 ## Team Information
 - Team: 1
-- QA tester: Not recorded
+- QA tester: Ahlumile Totose
 - QA branch: `QA1`
 - Current sprint: Sprint 2
 
