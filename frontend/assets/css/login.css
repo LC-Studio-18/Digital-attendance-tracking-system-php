@@ -449,3 +449,23 @@
     margin-bottom: 28px;
   }
 }
+
+.auth-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.auth-forgot-link {
+  color: #2f6b75;
+  font-family: "TASA Orbiter", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-forgot-link:hover,
+.auth-forgot-link:focus-visible {
+  color: #0e181f;
+  text-decoration: underline;
+}

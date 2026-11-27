@@ -18,3 +18,9 @@ if (!file_exists($backendHandler)) {
 }
 
 require_once $backendHandler;
+
+<?php if (isset($_GET['reset']) && $_GET['reset'] === 'success'): ?>
+  <div class="auth-alert auth-alert--success" role="status">
+    Your password has been updated. You can now sign in with your new password.
+  </div>
+<?php endif; ?>
