@@ -77,7 +77,7 @@ function destroySessionAndLogout(): void
     }
 
     session_destroy();
-    redirectTo('../frontend/login.php');
+    redirectTo('login.php');
 }
 
 /** Store a one-time login error for the next page request. */
