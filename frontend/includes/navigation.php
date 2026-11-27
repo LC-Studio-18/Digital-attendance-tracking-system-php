@@ -5,12 +5,14 @@
  *
  * Optional profile fields:
  * initials, name, access_label, user_role, organisation, status
+ * Missing values fall back to placeholders (AM / EP, Admin Name /
+ * Employee Name, Location). The active item defaults to dashboard.
  */
 
 $navigationConfig = $navigationConfig ?? [];
 
 $role = $navigationConfig['role'] ?? '';
-$activePage = $navigationConfig['active'] ?? '';
+$activePage = $navigationConfig['active'] ?? 'dashboard';
 $links = $navigationConfig['links'] ?? [];
 $profile = $navigationConfig['profile'] ?? [];
 
@@ -54,13 +56,14 @@ foreach ($navigationItems[$role] as $key => $label) {
   }
 }
 
-$initials = $profile['initials'] ?? '';
-$name = $profile['name'] ?? '';
+// Placeholder profile details until real login data is passed in.
+$initials = $profile['initials'] ?? ($role === 'admin' ? 'AM' : 'EP');
+$name = $profile['name'] ?? ($role === 'admin' ? 'Admin Name' : 'Employee Name');
 $accessLabel = $profile['access_label'] ?? (
   $role === 'admin' ? 'Admin Access' : 'Employee Access'
 );
 $userRole = $profile['user_role'] ?? ucfirst($role);
-$organisation = $profile['organisation'] ?? '';
+$organisation = $profile['organisation'] ?? 'Location';
 $status = $profile['status'] ?? 'Live';
 
 ?>
@@ -114,6 +117,21 @@ $status = $profile['status'] ?? 'Live';
         <?php endif; ?>
 
       </section>
+
+      <!-- Mobile Add Employee: admin only -->
+      <?php if ($role === 'admin' && !empty($links['add_employee'])): ?>
+        <a
+          href="<?php echo $escapeNavigation($links['add_employee']); ?>"
+          class="sidebar__link sidebar__link--add_employee">
+
+          <span
+            class="navigation-icon navigation-icon--document"
+            aria-hidden="true">🗎</span>
+
+          <span class="sidebar__label">Add Employee</span>
+
+        </a>
+      <?php endif; ?>
 
       <section class="sidebar__user-card">
 

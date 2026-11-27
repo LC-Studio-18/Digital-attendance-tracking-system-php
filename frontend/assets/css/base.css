@@ -1,0 +1,10 @@
+/* =========================================
+   BASE PAGE STYLES
+   Ink is reserved for the header, navigation and footer,
+   so the page itself stays white.
+========================================= */
+
+body {
+  background-color: #ffffff;
+  color: #0e181f;
+}

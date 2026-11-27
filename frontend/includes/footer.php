@@ -1,3 +1,26 @@
+<?php
+
+/**
+ * Reusable application footer.
+ *
+ * The access label follows the logged-in role, taken from the same
+ * $navigationConfig['role'] the navigation uses ('admin' or 'employee').
+ * With no role (e.g. the login page) only the system name is shown.
+ */
+
+$footerRole = $navigationConfig['role'] ?? '';
+
+$footerAccessLabels = [
+  'admin' => 'Admin access only',
+  'employee' => 'Employee access only',
+];
+
+$footerMeta = 'LC Attends System';
+
+if (isset($footerAccessLabels[$footerRole])) {
+  $footerMeta = $footerAccessLabels[$footerRole] . ' - ' . $footerMeta;
+}
+?>
 <footer class="site-footer" aria-label="Site footer">
   <div class="site-footer__inner">
     <div class="site-footer__brand-col">
@@ -30,7 +53,7 @@
           <a href="https://www.lcstudio.co.za" target="_blank" rel="noopener noreferrer" class="site-footer__link">www.lcstudio.co.za</a>
         </p>
       </address>
-      <p class="site-footer__meta">Admin access only &middot; LC Attends System</p>
+      <p class="site-footer__meta"><?php echo $footerMeta; ?></p>
     </div>
   </div>
 </footer>
