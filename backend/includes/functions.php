@@ -24,7 +24,7 @@ function requireLogin(): void
         trim($_SESSION['role']) === ''
     ) {
         // Redirect users who are not logged in.
-        redirectTo('/login.php');
+        redirectTo('../frontend/login.php');
     }
 }
 
