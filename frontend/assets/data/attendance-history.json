@@ -12,6 +12,7 @@
     { "staff_id": "LC-210", "name": "Cole Turner", "department": "Placements", "status": "offsite", "date": "2026-11-24", "clock_in": "09:20", "clock_out": "17:02", "late": true }
   ],
   "recent_activity": [
+    { "time": "15:20", "name": "Prue Halliwell", "staff_id": "LC-322", "clock_in": "08:26", "clock_out": "15:20", "action": "Time Corrected", "reason": "Prue Halliwell left early for an appointment" },
     { "time": "15:00", "name": "Paige Matthews", "action": "Clocked Out" },
     { "time": "14:20", "name": "Mira Hendricks", "action": "Clocked Out" },
     { "time": "13:00", "name": "HR Team Meeting", "action": null },

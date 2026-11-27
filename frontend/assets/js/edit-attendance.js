@@ -9,11 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const recordId = document.getElementById('attendanceId').value;
             const newClockIn = document.getElementById('clockInInput').value;
             const newClockOut = document.getElementById('clockOutInput').value;
+            const reason = document.getElementById('edit-time-reason').value.trim();
 
             const payload = {
                 record_id: recordId,
                 new_clock_in: newClockIn,
-                new_clock_out: newClockOut
+                new_clock_out: newClockOut,
+                reason: reason
             };
 
             try {
@@ -31,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     // CHAD'S FUNCTION: Trigger the UI update
                     if (window.EditTime && typeof window.EditTime.applySuccessfulCorrection === 'function') {
-                        window.EditTime.applySuccessfulCorrection(recordId, newClockIn, newClockOut);
+                        window.EditTime.applySuccessfulCorrection(recordId, newClockIn, newClockOut, reason);
                     } else {
                         console.warn("Chad's UI update function not found.");
                         alert("Time updated in database, but UI failed to refresh.");

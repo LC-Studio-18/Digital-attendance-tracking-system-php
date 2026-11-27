@@ -43,12 +43,12 @@
     // After a successful POST, call with the submitted values:
     // window.EditTime.applySuccessfulCorrection(payload.record_id, payload.new_clock_in, payload.new_clock_out).
     window.EditTime = window.EditTime || {};
-    window.EditTime.applySuccessfulCorrection = (recordId, newClockIn, newClockOut) => {
+    window.EditTime.applySuccessfulCorrection = (recordId, newClockIn, newClockOut, reason) => {
         if (!recordId || typeof window.EditTime.updateAttendanceRow !== "function") {
             throw new Error("The attendance UI updater is unavailable or the record ID is missing.");
         }
 
-        window.EditTime.updateAttendanceRow(recordId, newClockIn, newClockOut);
+        window.EditTime.updateAttendanceRow(recordId, newClockIn, newClockOut, reason);
         editTimeNotice.hidden = true;
         editTimeDialog.close();
         const updatedTrigger = Array.from(document.querySelectorAll("[data-edit-time-open][data-record-id]"))

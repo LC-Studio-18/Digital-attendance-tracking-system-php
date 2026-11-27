@@ -88,12 +88,75 @@ function renderStatic() {
   $("cOffsite").textContent = data.summary.offsite;
   const depts = [...new Set(data.records.map((r) => r.department))].sort();
   $("department").innerHTML = '<option value="">All Departments</option>' + depts.map((d) => '<option value="' + esc(d) + '">' + esc(d) + "</option>").join("");
-  $("activity").innerHTML = data.recent_activity.map((a) =>
-    "<li><span>" + esc(a.time) + "</span><span>" + esc(a.name) + (a.action ? "<em>&bull;" + esc(a.action) + "</em>" : "") + "</span></li>").join("");
+  $("activity").innerHTML = data.recent_activity.map((a) => {
+    const changed = a.action === "Time Corrected" && a.reason;
+    const staff = data.records.find((record) => record.staff_id === a.staff_id) || {};
+    const popupName = a.name;
+    const popupId = a.staff_id || staff.staff_id || "";
+    const popupInitials = esc(initials(popupName));
+    const name = changed
+      ? '<span class="activity-person activity-person--changed" tabindex="0" aria-label="' + esc(a.name + ". Attendance changed. Hover or focus to view the reason.") + '">' +
+        '<span class="activity-person__name">' + esc(a.name) + '</span>' +
+        '<span class="activity-person__icon" aria-hidden="true">i</span>' +
+        '<span class="activity-change-card" role="tooltip">' +
+          '<span class="activity-change-card__header"><span class="activity-change-card__avatar" style="background:' + colour(popupId) + '">' + popupInitials + '</span>' +
+            '<span class="activity-change-card__identity"><strong>' + esc(popupName) + '</strong><span>' + esc(popupId) + '</span></span></span>' +
+          '<span class="activity-change-card__body"><span class="activity-change-card__times">' +
+            '<span class="activity-change-card__field"><span>Clock In</span><strong>' + esc(a.clock_in || staff.clock_in || "\u2014") + '</strong></span>' +
+            '<span class="activity-change-card__field activity-change-card__field--out"><span>Clock Out</span><strong>' + esc(a.clock_out || staff.clock_out || "\u2014") + '</strong><span class="activity-change-card__badge" aria-label="Modified">M</span></span>' +
+          '</span><span class="activity-change-card__reason-label">Reason for Change</span>' +
+          '<span class="activity-change-card__reason">' + esc(a.reason) + '</span></span></span></span>'
+      : esc(a.name);
+    const action = a.action ? '<em' + (changed ? ' class="activity-edited"' : '') + '>&bull;' + esc(changed ? "Edited" : a.action) + "</em>" : "";
+    return "<li><span>" + esc(a.time) + "</span><span>" + name + action + "</span></li>";
+  }).join("");
 }
 
+function positionActivityReason(person) {
+  const popup = person.querySelector(".activity-change-card");
+  const name = person.querySelector(".activity-person__name");
+  if (!popup || !name || !popup.getClientRects().length) return;
+  const rect = popup.getBoundingClientRect();
+  if (!rect.width || !rect.height) {
+    requestAnimationFrame(() => positionActivityReason(person));
+    return;
+  }
+  const target = name.getBoundingClientRect();
+  const styles = getComputedStyle(popup);
+  const reach = parseFloat(styles.getPropertyValue("--tail-reach")) || 10;
+  const gap = reach + 3;
+  const aboveTop = target.top - rect.height - gap;
+  const below = aboveTop < 12;
+  const left = Math.max(12, Math.min(target.left + target.width / 2 - rect.width / 2, window.innerWidth - rect.width - 12));
+  const top = below
+    ? Math.max(12, Math.min(target.bottom + gap, window.innerHeight - rect.height - 12))
+    : aboveTop;
+  const tailCenter = Math.max(24, Math.min(target.left + target.width / 2 - left, rect.width - 24));
+  popup.classList.toggle("activity-change-card--below", below);
+  popup.style.left = left + "px";
+  popup.style.top = top + "px";
+  popup.style.setProperty("--tail-left", tailCenter - 3 + "px");
+}
+
+function positionVisibleActivityReasons() {
+  document.querySelectorAll(".activity-change-card").forEach((popup) => {
+    if (popup.getClientRects().length) positionActivityReason(popup.parentElement);
+  });
+}
+
+$("activity").addEventListener("mouseover", (event) => {
+  const person = event.target.closest(".activity-person");
+  if (person) positionActivityReason(person);
+});
+$("activity").addEventListener("focusin", (event) => {
+  const person = event.target.closest(".activity-person");
+  if (person) positionActivityReason(person);
+});
+$("activity").addEventListener("scroll", positionVisibleActivityReasons, { passive: true });
+window.addEventListener("resize", positionVisibleActivityReasons);
+
 window.EditTime = window.EditTime || {};
-window.EditTime.updateAttendanceRow = function (recordId, clockIn, clockOut) {
+window.EditTime.updateAttendanceRow = function (recordId, clockIn, clockOut, reason) {
   if (!data) {
     throw new Error("Attendance records are not loaded.");
   }
@@ -108,7 +171,11 @@ window.EditTime.updateAttendanceRow = function (recordId, clockIn, clockOut) {
   data.recent_activity.unshift({
     time: new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date()),
     name: record.name,
-    action: "Time Corrected"
+    staff_id: record.staff_id,
+    clock_in: record.clock_in,
+    clock_out: record.clock_out,
+    action: "Time Corrected",
+    reason: String(reason || "").trim()
   });
 
   renderStatic();
